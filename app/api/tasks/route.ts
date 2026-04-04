@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server';
 import { getTasks, addTask, toggleTaskCompleted } from '../../../lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
   try {
-    // Note: To dynamically extract userId we would use URL search params or Auth headers.
-    // Our Supabase helper uses the master demo user universally for now.
+    console.log("Fetching tasks route hit...");
     const tasks = await getTasks();
+    console.log("Tasks fetched successfully:", tasks);
     return NextResponse.json({ tasks });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error("Critical error in /api/tasks GET:", err);
+    return NextResponse.json({ error: err.message || "Unknown error" }, { status: 500 });
   }
 }
 

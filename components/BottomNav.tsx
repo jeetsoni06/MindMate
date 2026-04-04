@@ -26,7 +26,7 @@ export default function BottomNav() {
         </div>
         <span className={`text-[9px] font-bold uppercase tracking-widest ${pathname === '/tasks' ? 'text-[#FE005B]' : 'text-gray-400'}`}>Tasks</span>
       </Link>
-      <Link href="#" className="flex flex-col items-center justify-center cursor-pointer transition-all w-20 hover:scale-105 active:scale-95 opacity-50">
+      <Link href="/community" className={`flex flex-col items-center justify-center cursor-pointer transition-all hover:scale-105 active:scale-95 ${pathname === '/community' ? 'bg-red-50 text-[#FE005B] px-4 py-1.5 rounded-2xl w-24' : 'w-20'}`}>
         <div className={`mb-1 ${pathname === '/community' ? 'text-[#FE005B]' : 'text-gray-400'}`}>
           <Users size={20} strokeWidth={2.5} />
         </div>

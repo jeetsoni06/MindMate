@@ -448,13 +448,18 @@ export async function getChatMessages(userId?: string) {
 
 export async function getTasks(userId?: string) {
   const activeUserId = getVaultId(userId);
+  const queryUserId = activeUserId === "00000000-0000-0000-0000-000000000000" ? null : activeUserId;
+  
   try {
-    const { data, error } = await supabase
-      .from('tasks')
-      .select('*')
-      .eq('user_id', activeUserId)
-      .order('created_at', { ascending: true });
+    let query = supabase.from('tasks').select('*').order('created_at', { ascending: true });
+    
+    if (queryUserId === null) {
+      query = query.is('user_id', null);
+    } else {
+      query = query.eq('user_id', queryUserId);
+    }
 
+    const { data, error } = await query;
     if (error) throw error;
     return data || [];
   } catch (err) {
@@ -465,11 +470,13 @@ export async function getTasks(userId?: string) {
 
 export async function addTask(payload: { title: string, subtitle?: string, icon_name?: string }, userId?: string) {
   const activeUserId = getVaultId(userId);
+  const insertUserId = activeUserId === "00000000-0000-0000-0000-000000000000" ? null : activeUserId;
+  
   try {
     const { data, error } = await supabase
       .from('tasks')
       .insert([{
-        user_id: activeUserId,
+        user_id: insertUserId,
         title: payload.title,
         subtitle: payload.subtitle || null,
         icon_name: payload.icon_name || null
@@ -486,14 +493,22 @@ export async function addTask(payload: { title: string, subtitle?: string, icon_
 }
 
 export async function toggleTaskCompleted(taskId: string, currentStatus: boolean, userId?: string) {
-  const activeUserId = getVaultId(userId); // Ensure user boundary
+  const activeUserId = getVaultId(userId); 
+  const updateUserId = activeUserId === "00000000-0000-0000-0000-000000000000" ? null : activeUserId;
+  
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('tasks')
       .update({ is_completed: !currentStatus })
-      .eq('id', taskId)
-      .eq('user_id', activeUserId)
-      .select().single();
+      .eq('id', taskId);
+      
+    if (updateUserId === null) {
+      query = query.is('user_id', null);
+    } else {
+      query = query.eq('user_id', updateUserId);
+    }
+      
+    const { data, error } = await query.select().single();
 
     if (error) throw error;
     return data;
