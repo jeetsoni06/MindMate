@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#ffd9e2",
+                    "surface": "#f8faf8",
+                    "inverse-on-surface": "#eff1ef",
+                    "tertiary": "#78555e",
+                    "outline": "#8d7072",
+                    "on-primary-fixed-variant": "#91002e",
+                    "error": "#ba1a1a",
+                    "secondary-fixed-dim": "#91d699",
+                    "inverse-primary": "#ffb2b9",
+                    "on-tertiary-container": "#42262e",
+                    "on-secondary-fixed-variant": "#095223",
+                    "surface-variant": "#e1e3e1",
+                    "surface-tint": "#b42243",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "surface-dim": "#d8dad9",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#5e3e47",
+                    "surface-container": "#eceeec",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed": "#adf3b3",
+                    "on-tertiary-fixed": "#2d141c",
+                    "on-surface": "#191c1b",
+                    "on-secondary-fixed": "#002109",
+                    "background": "#f8faf8",
+                    "on-surface-variant": "#594042",
+                    "outline-variant": "#e1bec0",
+                    "on-background": "#191c1b",
+                    "on-secondary-container": "#2e6f3c",
+                    "on-error": "#ffffff",
+                    "primary-container": "#ff5c77",
+                    "surface-container-highest": "#e1e3e1",
+                    "tertiary-container": "#b38b95",
+                    "inverse-surface": "#2e3130",
+                    "primary-fixed": "#ffdadc",
+                    "secondary-container": "#aaf0b0",
+                    "on-primary-container": "#63001d",
+                    "on-primary-fixed": "#40000f",
+                    "primary": "#b42243",
+                    "surface-container-low": "#f2f4f2",
+                    "surface-bright": "#f8faf8",
+                    "secondary": "#296b38",
+                    "error-container": "#ffdad6",
+                    "primary-fixed-dim": "#ffb2b9",
+                    "tertiary-fixed-dim": "#e7bbc6",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-high": "#e6e9e7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .organic-backdrop {
+            backdrop-filter: blur(12px);
+            background-color: rgba(25, 28, 27, 0.4);
+        }
+        .soft-shadow {
+            box-shadow: 0 20px 40px -10px rgba(25, 28, 27, 0.05);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen">
+<!-- Main Content Background (Simulated Dashboard) -->
+<div class="fixed inset-0 z-0 overflow-hidden p-6 md:p-12 opacity-40 select-none pointer-events-none">
+<div class="max-w-4xl mx-auto space-y-12">
+<header class="flex justify-between items-end">
+<div>
+<p class="text-label-md font-semibold tracking-wider text-primary uppercase mb-2">Good Morning</p>
+<h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-on-surface">How are you, <br/>Serena?</h1>
+</div>
+<div class="w-16 h-16 rounded-full bg-secondary-container"></div>
+</header>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-surface-container-low h-64 rounded-xl"></div>
+<div class="bg-primary-fixed h-64 rounded-xl"></div>
+</div>
+</div>
+</div>
+<!-- The Floating Sanctuary: Compose Modal -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 organic-backdrop">
+<!-- Modal Container -->
+<div class="bg-surface-container-lowest w-full max-w-2xl rounded-xl soft-shadow overflow-hidden flex flex-col relative">
+<!-- TopAppBar Integrated into Modal -->
+<header class="flex items-center justify-between px-6 h-16 w-full bg-[#f8faf8] dark:bg-zinc-950">
+<button class="text-zinc-500 hover:opacity-80 transition-opacity active:scale-95 transition-transform flex items-center justify-center w-10 h-10">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<h2 class="font-['Plus_Jakarta_Sans'] text-lg font-bold tracking-tight text-[#b42243] dark:text-[#ff5c77]">Reflect</h2>
+<button class="text-[#b42243] dark:text-[#ff5c77] font-bold hover:opacity-80 transition-opacity active:scale-95 transition-transform px-4 py-2">
+                    Save
+                </button>
+</header>
+<!-- Modal Content -->
+<div class="p-8 space-y-8 flex-1 overflow-y-auto">
+<div class="space-y-2">
+<span class="text-[0.75rem] font-bold uppercase tracking-widest text-secondary mb-4 block">New Journal Entry</span>
+<h3 class="text-3xl font-extrabold tracking-tight leading-tight text-on-surface">What's on your mind today?</h3>
+</div>
+<!-- Textarea: The Mindful Journal -->
+<div class="relative">
+<textarea class="w-full min-h-[300px] p-6 bg-surface-container-low border-none rounded-md text-on-surface text-lg leading-relaxed focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all duration-300 resize-none placeholder:text-outline-variant/60" placeholder="Start typing your thoughts here..."></textarea>
+<!-- Decorative Elements -->
+<div class="absolute bottom-4 right-4 flex items-center gap-2 opacity-40">
+<span class="text-xs font-medium text-outline">Journaling focus active</span>
+<span class="material-symbols-outlined text-sm" data-icon="auto_awesome">auto_awesome</span>
+</div>
+</div>
+<!-- Emotional Chips: Asymmetric Layout -->
+<div class="space-y-4">
+<p class="text-label-md font-semibold text-tertiary">Quick tags</p>
+<div class="flex flex-wrap gap-3">
+<button class="px-6 py-2 bg-secondary-fixed text-on-secondary-fixed rounded-full text-sm font-medium hover:opacity-80 transition-all active:scale-95">Calm</button>
+<button class="px-6 py-2 bg-tertiary-fixed text-on-tertiary-fixed rounded-full text-sm font-medium hover:opacity-80 transition-all active:scale-95">Anxious</button>
+<button class="px-6 py-2 bg-primary-fixed text-on-primary-fixed rounded-full text-sm font-medium hover:opacity-80 transition-all active:scale-95">Inspired</button>
+<button class="px-6 py-2 bg-surface-container-high text-on-surface-variant rounded-full text-sm font-medium hover:opacity-80 transition-all active:scale-95">Grateful</button>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<footer class="p-8 pt-0 flex items-center justify-between gap-4">
+<button class="px-8 py-4 text-primary font-bold text-sm uppercase tracking-widest hover:bg-primary/5 rounded-full transition-all active:scale-95">
+                    Cancel
+                </button>
+<button class="flex-1 md:flex-none md:min-w-[200px] px-8 py-4 bg-gradient-to-r from-primary to-primary-container text-white font-bold text-sm uppercase tracking-widest rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-95 text-center">
+                    Save Entry
+                </button>
+</footer>
+</div>
+</div>
+<!-- Navigation Shell (Suppressed context check: This is a Task-Focused modal sub-page, so shell is hidden, but shown here for background context if it was a main destination) -->
+<nav class="fixed bottom-0 left-0 w-full px-8 pb-6 pt-3 flex justify-around items-center bg-[#f8faf8]/80 dark:bg-zinc-950/80 backdrop-blur-xl rounded-t-[40px] z-40 shadow-[0_-20px_40px_-10px_rgba(0,0,0,0.05)] opacity-20 pointer-events-none">
+<div class="flex flex-col items-center justify-center bg-[#ff5c77]/10 text-[#b42243] dark:text-[#ff5c77] rounded-full px-5 py-2">
+<span class="material-symbols-outlined mb-1" data-icon="edit_note">edit_note</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-wider">Journal</span>
+</div>
+<div class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-600">
+<span class="material-symbols-outlined mb-1" data-icon="self_improvement">self_improvement</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-wider">Meditate</span>
+</div>
+<div class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-600">
+<span class="material-symbols-outlined mb-1" data-icon="bedtime">bedtime</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-wider">Sleep</span>
+</div>
+<div class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-600">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-wider">Profile</span>
+</div>
+</nav>
+</body></html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mindmate - Journal Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8faf8;
+        }
+        [v-cloak] { display: none; }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#78555e",
+                    "primary-fixed": "#ffdadc",
+                    "outline": "#8d7072",
+                    "on-tertiary-fixed-variant": "#5e3e47",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#91d699",
+                    "surface-container-highest": "#e1e3e1",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed": "#ffd9e2",
+                    "on-primary-fixed-variant": "#91002e",
+                    "tertiary-fixed-dim": "#e7bbc6",
+                    "surface": "#f8faf8",
+                    "on-background": "#191c1b",
+                    "error": "#ba1a1a",
+                    "surface-dim": "#d8dad9",
+                    "inverse-surface": "#2e3130",
+                    "surface-container": "#eceeec",
+                    "secondary-fixed": "#adf3b3",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-variant": "#e1e3e1",
+                    "on-tertiary-container": "#42262e",
+                    "on-error": "#ffffff",
+                    "inverse-primary": "#ffb2b9",
+                    "primary-fixed-dim": "#ffb2b9",
+                    "on-primary-container": "#63001d",
+                    "on-tertiary-fixed": "#2d141c",
+                    "surface-tint": "#b42243",
+                    "on-surface-variant": "#594042",
+                    "outline-variant": "#e1bec0",
+                    "secondary": "#296b38",
+                    "surface-bright": "#f8faf8",
+                    "surface-container-high": "#e6e9e7",
+                    "primary-container": "#ff5c77",
+                    "on-secondary-fixed-variant": "#095223",
+                    "primary": "#b42243",
+                    "on-secondary-fixed": "#002109",
+                    "on-primary-fixed": "#40000f",
+                    "background": "#f8faf8",
+                    "surface-container-low": "#f2f4f2",
+                    "on-secondary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "tertiary-container": "#b38b95",
+                    "on-tertiary": "#ffffff",
+                    "on-surface": "#191c1b",
+                    "secondary-container": "#aaf0b0",
+                    "on-secondary-container": "#2e6f3c",
+                    "inverse-on-surface": "#eff1ef"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        }
+      }
+    </script>
+<!-- Alpine.js for simple reactivity -->
+<script defer="" src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-surface text-on-surface min-h-screen" x-data="journalApp()">
+<!-- TopAppBar Shell -->
+<header class="flex justify-between items-center w-full bg-transparent backdrop-blur-xl fixed top-0 z-50 px-6 py-4">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#b42243] hover:opacity-80 transition-opacity active:scale-95 transition-transform" data-icon="menu">menu</span>
+<h1 class="text-2xl font-bold text-[#b42243] dark:text-[#ff5c77] font-['Plus_Jakarta_Sans'] tracking-tight">Mindmate</h1>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+<img alt="User" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKwJE-mkRun8zaSmsMWP0ZPjTbRi6oxI-IJZ07O3oKUlTwQwyl0A6N6gqlPgtICLBt3OLvb6MLdxU7gFWsgKBrOFUdLXDG9b0FdzlYJPVuQ54qShMjPQE8CTb_3VH_GhUA2ty-MDW6nPVIJXQthEy3VWJHgOeVYJenhdOGuxtEiU9s1xow3VtvIr1AXEF1oNlEapYDeb_-LRbigzsj6Gv_cnZRhnBAniyb3spCHR6ABREe46pF2l6NL9EScGO4P_-_0OWExcj-_1I"/>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-4xl mx-auto">
+<!-- Hero Editorial Section -->
+<section class="mb-12">
+<span class="label-md uppercase tracking-[0.1em] text-tertiary font-bold mb-2 block">Daily Reflections</span>
+<h2 class="text-5xl font-extrabold text-on-surface tracking-tighter leading-none mb-4">Your Mindful <br/><span class="text-primary">Sanctuary.</span></h2>
+<p class="text-on-surface-variant text-lg max-w-md leading-relaxed">Gather your thoughts like smooth river stones. Every entry is a step toward clarity.</p>
+</section>
+<!-- Journal Entries Container -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6" x-cloak="">
+<!-- Loading State -->
+<template x-if="loading">
+<div class="md:col-span-12 py-20 text-center">
+<div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
+<p class="mt-4 text-on-surface-variant">Gathering your thoughts...</p>
+</div>
+</template>
+<!-- Dynamic Journal Entries -->
+<template :key="entry.id" x-for="(entry, index) in entries">
+<div :class="index === 0 ? 'md:col-span-12' : 'md:col-span-6'" class="group">
+<div :class="index % 2 === 0 ? 'border-primary-container' : 'border-tertiary'" class="bg-surface-container-low rounded-lg p-6 flex flex-col gap-4 border-l-8 transition-all hover:bg-surface-container-high">
+<div class="flex justify-between items-center">
+<span class="font-bold text-xs uppercase tracking-widest text-on-surface-variant" x-text="formatDate(entry.created_at)"></span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="more_vert">more_vert</span>
+</div>
+<p class="text-on-surface font-medium leading-relaxed" x-text="entry.content_text"></p>
+<div class="flex gap-2 items-center">
+<span class="material-symbols-outlined text-outline text-sm" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-xs text-outline font-bold">Reflection</span>
+</div>
+</div>
+</div>
+</template>
+<!-- Empty State -->
+<template x-if="!loading &amp;&amp; entries.length === 0">
+<div class="md:col-span-12 flex flex-col items-center justify-center py-20 text-center animate-in fade-in duration-700">
+<div class="w-48 h-48 bg-secondary-container/30 rounded-full flex items-center justify-center mb-8 relative">
+<span class="material-symbols-outlined text-7xl text-secondary/40" data-icon="spa" style="font-variation-settings: 'FILL' 1;">spa</span>
+<div class="absolute -top-2 -right-2 w-12 h-12 bg-primary-container rounded-full blur-xl opacity-40"></div>
+</div>
+<h3 class="text-2xl font-bold text-on-surface mb-2">No entries yet</h3>
+<p class="text-on-surface-variant max-w-xs mb-8">Your sanctuary is waiting. Begin your journey of self-discovery by writing your first entry.</p>
+<button class="bg-primary text-on-primary px-8 py-4 rounded-full font-bold shadow-lg shadow-primary/20 flex items-center gap-2 hover:scale-105 transition-transform active:scale-95">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                    Start Your First Entry
+                </button>
+</div>
+</template>
+</div>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed right-6 bottom-24 w-16 h-16 bg-gradient-to-tr from-primary to-primary-container text-on-primary rounded-full shadow-2xl flex items-center justify-center z-50 hover:scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-3xl" data-icon="add_notes">add_notes</span>
+</button>
+<!-- BottomNavBar Shell -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-3 backdrop-blur-2xl bg-[#f8faf8]/80 dark:bg-stone-950/80 rounded-t-[40px] px-4 pb-safe shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
+<!-- Journal (Active) -->
+<a class="flex flex-col items-center justify-center bg-[#ff5c77]/10 text-[#b42243] dark:text-[#ff5c77] rounded-full px-5 py-2 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note" style="font-variation-settings: 'FILL' 1;">edit_note</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide uppercase mt-1">Journal</span>
+</a>
+<!-- Meditate -->
+<a class="flex flex-col items-center justify-center text-[#78555e] dark:text-stone-500 px-5 py-2 hover:text-[#b42243] transition-colors active:scale-90 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="self_improvement">self_improvement</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide uppercase mt-1">Meditate</span>
+</a>
+<!-- Sleep -->
+<a class="flex flex-col items-center justify-center text-[#78555e] dark:text-stone-500 px-5 py-2 hover:text-[#b42243] transition-colors active:scale-90 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="bedtime">bedtime</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide uppercase mt-1">Sleep</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-[#78555e] dark:text-stone-500 px-5 py-2 hover:text-[#b42243] transition-colors active:scale-90 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide uppercase mt-1">Profile</span>
+</a>
+</nav>
+<!-- Background Decorative Elements -->
+<div class="fixed top-[20%] -left-20 w-96 h-96 bg-primary-container/10 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+<div class="fixed bottom-[10%] -right-20 w-80 h-80 bg-secondary-container/15 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+<script type="module">
+    import { supabase } from '../utils/supabaseClient';
+
+    window.journalApp = () => {
+        return {
+            entries: [],
+            loading: true,
+            async init() {
+                await this.fetchEntries();
+            },
+            async fetchEntries() {
+                this.loading = true;
+                try {
+                    const { data, error } = await supabase
+                        .from('journals')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+
+                    if (error) throw error;
+                    this.entries = data || [];
+                } catch (error) {
+                    console.error('Error fetching journals:', error.message);
+                } finally {
+                    this.loading = false;
+                }
+            },
+            formatDate(timestamp) {
+                if (!timestamp) return '';
+                const date = new Date(timestamp);
+                const now = new Date();
+                const isToday = date.toDateString() === now.toDateString();
+                
+                if (isToday) {
+                    return `Today, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                }
+                
+                return date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                });
+            }
+        }
+    }
+</script>
+</body></html>

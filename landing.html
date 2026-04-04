@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MindMate - Your Safe Space</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed": "#002109",
+                    "primary-fixed-dim": "#ffb2b9",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#e1e3e1",
+                    "secondary-container": "#aaf0b0",
+                    "on-surface": "#191c1b",
+                    "primary": "#b42243",
+                    "outline-variant": "#e1bec0",
+                    "error-container": "#ffdad6",
+                    "tertiary-fixed": "#ffd9e2",
+                    "on-secondary-container": "#2e6f3c",
+                    "secondary": "#296b38",
+                    "tertiary-fixed-dim": "#e7bbc6",
+                    "tertiary": "#78555e",
+                    "on-tertiary-container": "#42262e",
+                    "on-surface-variant": "#594042",
+                    "surface-container-low": "#f2f4f2",
+                    "surface-dim": "#d8dad9",
+                    "surface-variant": "#e1e3e1",
+                    "on-error-container": "#93000a",
+                    "on-primary-container": "#63001d",
+                    "outline": "#8d7072",
+                    "background": "#f8faf8",
+                    "secondary-fixed-dim": "#91d699",
+                    "on-secondary-fixed-variant": "#095223",
+                    "inverse-on-surface": "#eff1ef",
+                    "on-background": "#191c1b",
+                    "secondary-fixed": "#adf3b3",
+                    "surface": "#f8faf8",
+                    "surface-bright": "#f8faf8",
+                    "error": "#ba1a1a",
+                    "surface-container-high": "#e6e9e7",
+                    "surface-tint": "#b42243",
+                    "on-tertiary-fixed": "#2d141c",
+                    "inverse-surface": "#2e3130",
+                    "inverse-primary": "#ffb2b9",
+                    "primary-container": "#ff5c77",
+                    "on-tertiary-fixed-variant": "#5e3e47",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed-variant": "#91002e",
+                    "tertiary-container": "#b38b95",
+                    "on-primary-fixed": "#40000f",
+                    "on-error": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "surface-container": "#eceeec",
+                    "primary-fixed": "#ffdadc"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8faf8; }
+        .glass { background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .hero-gradient { background: radial-gradient(circle at top right, #ffdadc 0%, #f8faf8 50%, #adf3b3 100%); }
+        .asymmetric-pill { border-radius: 4rem 1rem 4rem 1rem; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/70 dark:bg-zinc-900/70 backdrop-blur-xl">
+<nav class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
+<div class="text-2xl font-bold tracking-tight text-rose-800 dark:text-rose-300">MindMate</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-stone-600 dark:text-stone-400 hover:bg-rose-50/50 transition-all px-3 py-1 rounded-full text-body-lg" href="#">Features</a>
+<a class="text-stone-600 dark:text-stone-400 hover:bg-rose-50/50 transition-all px-3 py-1 rounded-full text-body-lg" href="#">How It Works</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-rose-700 dark:text-rose-400 px-6 py-2 rounded-full border border-rose-700/20 font-medium hover:bg-rose-50 transition-all">Sign In</button>
+<button class="bg-primary text-white px-6 py-2 rounded-full font-medium shadow-lg shadow-primary/20 hover:scale-105 transition-all">Create Account</button>
+</div>
+</nav>
+</header>
+<main class="overflow-x-hidden">
+<!-- Hero Section -->
+<section class="relative min-h-screen pt-32 pb-20 px-8 flex flex-col items-center justify-center text-center hero-gradient">
+<div class="max-w-4xl mx-auto space-y-8 relative z-10">
+<span class="label-md uppercase tracking-[0.2em] text-primary font-bold bg-primary-fixed px-4 py-1.5 rounded-full">Your Personal Sanctuary</span>
+<h1 class="text-5xl md:text-7xl font-extrabold tracking-tight leading-tight text-on-surface">
+                    Your Safe Space to <br/>
+<span class="text-primary italic">Reflect</span>, Relax, and Reconnect
+                </h1>
+<p class="text-xl md:text-2xl text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+                    Journal your thoughts, talk to your AI companion, and build a mindful routine that grows with you.
+                </p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
+<button class="bg-primary hover:bg-primary-container text-white px-10 py-5 rounded-full text-lg font-bold transition-all shadow-xl shadow-primary/10">
+                        Get Started
+                    </button>
+<button class="bg-surface/50 backdrop-blur-md border border-outline-variant/30 text-on-surface px-10 py-5 rounded-full text-lg font-bold hover:bg-white transition-all">
+                        Try AI Friend
+                    </button>
+</div>
+</div>
+<!-- Floating Decorative Elements -->
+<div class="absolute top-1/4 -left-12 w-64 h-64 bg-primary-container/20 rounded-full blur-3xl"></div>
+<div class="absolute bottom-1/4 -right-12 w-96 h-96 bg-secondary-container/20 rounded-full blur-3xl"></div>
+<div class="mt-20 w-full max-w-6xl mx-auto px-4">
+<div class="relative group">
+<div class="absolute -inset-2 bg-gradient-to-r from-primary to-secondary opacity-10 blur-2xl group-hover:opacity-20 transition duration-1000"></div>
+<img alt="Peaceful interior" class="rounded-lg w-full aspect-[21/9] object-cover relative shadow-2xl" data-alt="Modern minimal living room with soft morning light, lush plants, and a comfortable chair for meditation, high-end editorial photography style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpz1SFP_AmzuHdMo5n2leMoFkFamKWvInXfbleivDUyeviPKUZTN-c3idGsHaj8kBc0jlTp-ffGenI321GJC1lQg4tTYE26kuH28qT69jf16DAvGTFMuOuODFRsmbWyyT4Zo4W4gzhCGdYa5zATZp8JSQFVWWrP6AjvaRXdo-CDivdINABmOdftXrE30jdYjYsL2F1AjKpnKcMOfmD0wYA8rfIBHQq7LblatepBBMOgA8GF7O0cTTnX4fOj_oIxRH69dOgDR1Sf8A"/>
+</div>
+</div>
+</section>
+<!-- Features Section (Bento Grid Style) -->
+<section class="py-24 px-8 max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+<div class="max-w-xl">
+<h2 class="text-4xl font-bold tracking-tight mb-4">Mindful Tools for Every Moment</h2>
+<p class="text-body-lg text-on-surface-variant">Designed to be gentle, supportive, and completely private. Explore features that help you find your center.</p>
+</div>
+<div class="hidden md:block">
+<span class="material-symbols-outlined text-6xl text-primary-fixed-dim">spa</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Smart Journaling -->
+<div class="md:col-span-2 bg-surface-container-low rounded-lg p-10 hover:bg-primary-fixed/30 transition-colors group">
+<div class="flex flex-col h-full justify-between">
+<div>
+<span class="material-symbols-outlined text-4xl text-primary mb-6 block" data-icon="edit_note">edit_note</span>
+<h3 class="text-3xl font-bold mb-4">Smart Journaling</h3>
+<p class="text-body-lg text-on-surface-variant max-w-md">Write freely and track your thoughts in a private, secure space. Our intelligent prompts help you dive deeper when you're feeling stuck.</p>
+</div>
+<div class="mt-12 overflow-hidden rounded-xl border border-outline-variant/20">
+<img alt="Journaling" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Close up of an open journal on a wooden table with a soft aesthetic pen and warm sunlight shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbmUnETo5dSDeQ_V9y2SenXzVXS1zY_PS1DI9aNtAHbvz1xLH9AWtpKabUqdfcLvj5xFFtLdh3LXhDmOKf-Jc9xJ6Wdgu53rmuJcE-su41TT3J1z2nCQZSjmiC5B3r_a5FHhB3XJFyMsAnkWtMxQMP7uxywGxfTZdPZ0tOJFW1KwBXK68fiYkA7N266L064boJGOV7ODT6k2HS2V3wLKngRiAa0-Zri_eojO5xerc_ts-zMqJJkqTMiY_9qevrJwSMJ9nWHbPe2yU"/>
+</div>
+</div>
+</div>
+<!-- AI Friend -->
+<div class="bg-secondary-container/20 rounded-lg p-10 hover:bg-secondary-container/40 transition-colors group">
+<div class="flex flex-col h-full items-center text-center">
+<span class="material-symbols-outlined text-5xl text-secondary mb-6" data-icon="auto_awesome">auto_awesome</span>
+<h3 class="text-2xl font-bold mb-4">AI Friend</h3>
+<p class="text-body-md text-on-surface-variant">Talk to a compassionate AI that listens without judgment, providing a space for instant relief and perspective.</p>
+<div class="mt-auto pt-8">
+<div class="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
+<span class="material-symbols-outlined text-secondary text-4xl" data-icon="smart_toy">smart_toy</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Mindfulness Streak -->
+<div class="bg-tertiary-fixed/30 rounded-lg p-10 hover:bg-tertiary-fixed/50 transition-colors group">
+<div class="flex flex-col h-full">
+<span class="material-symbols-outlined text-4xl text-tertiary mb-6" data-icon="local_fire_department">local_fire_department</span>
+<h3 class="text-2xl font-bold mb-4">Daily Streak</h3>
+<p class="text-body-md text-on-surface-variant">Stay consistent and build healthy mental habits. Small daily steps lead to lasting peace of mind.</p>
+<div class="mt-8 bg-white/50 rounded-xl p-6 backdrop-blur-sm">
+<div class="flex gap-2 justify-between items-end h-12">
+<div class="w-3 h-full bg-tertiary rounded-full"></div>
+<div class="w-3 h-3/4 bg-tertiary/60 rounded-full"></div>
+<div class="w-3 h-full bg-tertiary rounded-full"></div>
+<div class="w-3 h-1/2 bg-tertiary/40 rounded-full"></div>
+<div class="w-3 h-full bg-tertiary rounded-full"></div>
+<div class="w-3 h-5/6 bg-tertiary/70 rounded-full"></div>
+<div class="w-3 h-full bg-tertiary rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Favorites & Insights -->
+<div class="md:col-span-2 bg-surface-container-high rounded-lg p-10 hover:bg-surface-container-highest transition-colors flex flex-col md:flex-row gap-10">
+<div class="flex-1">
+<span class="material-symbols-outlined text-4xl text-primary mb-6" data-icon="star">star</span>
+<h3 class="text-3xl font-bold mb-4">Favorites &amp; Insights</h3>
+<p class="text-body-lg text-on-surface-variant">Save meaningful entries and reflect on your journey. See patterns in your mood and celebrate your growth over time.</p>
+</div>
+<div class="flex-1 relative">
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent rounded-lg"></div>
+<img alt="Abstract light" class="rounded-lg h-full object-cover w-full" data-alt="Ethereal abstract background with soft overlapping light circles in pink and peach tones, high-end editorial style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWJ5mViL08BRplGWg-GjpWzSPkkdkxGZ3ywLdGbzvN2lXIVeUmK3_tyPUGPyiHZlv-zHr8ysVxvgcuBJs6BN98Pwb8NrzC4kB4NhA9EoFnN_BgSrOckGwTrb3wv9Kf_lQBIvT-93FcrdPZELTgpyBfOuOjYwjwgPepQ0V63cNbPjPXFayKCY7L7RkADfWbsBWN2u3eyZIWhzA5wd21HPemYSmRazZ9dMAdlcJOTq_XWmlu8dSUx2eWrx9MBE1BV8UQXLsDaoSzvwI"/>
+</div>
+</div>
+</div>
+</section>
+<!-- How It Works Section -->
+<section class="py-24 bg-surface-container-low">
+<div class="max-w-7xl mx-auto px-8">
+<div class="text-center mb-20">
+<h2 class="text-4xl font-bold tracking-tight mb-4">Your Path to Calm</h2>
+<p class="text-body-lg text-on-surface-variant max-w-xl mx-auto">Three simple steps to start nurturing your mental well-being every single day.</p>
+</div>
+<div class="relative">
+<!-- Connector line (Desktop) -->
+<div class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-outline-variant/30 -translate-y-1/2"></div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+<!-- Step 1 -->
+<div class="relative flex flex-col items-center text-center group">
+<div class="w-20 h-20 rounded-full bg-white flex items-center justify-center text-2xl font-bold text-primary shadow-xl mb-8 relative z-10 group-hover:scale-110 transition-transform">
+                                1
+                            </div>
+<h3 class="text-2xl font-bold mb-4">Write your thoughts</h3>
+<p class="text-on-surface-variant leading-relaxed">
+                                Let it all out. Use our secure digital journal to express yourself without any limitations or pressure.
+                            </p>
+</div>
+<!-- Step 2 -->
+<div class="relative flex flex-col items-center text-center group">
+<div class="w-20 h-20 rounded-full bg-white flex items-center justify-center text-2xl font-bold text-secondary shadow-xl mb-8 relative z-10 group-hover:scale-110 transition-transform">
+                                2
+                            </div>
+<h3 class="text-2xl font-bold mb-4">Get gentle AI feedback</h3>
+<p class="text-on-surface-variant leading-relaxed">
+                                Receive empathetic insights and supportive reflections from your personal AI companion.
+                            </p>
+</div>
+<!-- Step 3 -->
+<div class="relative flex flex-col items-center text-center group">
+<div class="w-20 h-20 rounded-full bg-white flex items-center justify-center text-2xl font-bold text-tertiary shadow-xl mb-8 relative z-10 group-hover:scale-110 transition-transform">
+                                3
+                            </div>
+<h3 class="text-2xl font-bold mb-4">Build your streak</h3>
+<p class="text-on-surface-variant leading-relaxed">
+                                Consistency is key. Track your progress and watch your mental resilience grow day by day.
+                            </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="py-24 px-8 overflow-hidden">
+<div class="max-w-5xl mx-auto bg-primary asymmetric-pill p-12 md:p-20 text-center relative">
+<div class="absolute top-0 right-0 p-8 opacity-10">
+<span class="material-symbols-outlined text-9xl" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<div class="relative z-10">
+<h2 class="text-white text-4xl md:text-5xl font-extrabold mb-8">Ready to find your peace?</h2>
+<p class="text-primary-fixed/80 text-xl mb-12 max-w-2xl mx-auto">Join thousands of others who have found a safe harbor in MindMate. Start your journey today for free.</p>
+<button class="bg-white text-primary hover:bg-primary-fixed px-12 py-5 rounded-full text-xl font-bold transition-all shadow-2xl">
+                        Create Your Sanctuary
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-stone-50 dark:bg-zinc-950 w-full py-12 border-t border-stone-200/20">
+<div class="flex flex-col md:flex-row justify-between items-center px-12 max-w-7xl mx-auto gap-8">
+<div class="flex flex-col items-center md:items-start">
+<span class="font-bold text-rose-800 text-2xl mb-2">MindMate</span>
+<p class="text-stone-500 text-sm font-plus-jakarta tracking-wide">Made for mental wellness</p>
+</div>
+<div class="flex gap-8">
+<a class="text-stone-500 hover:text-rose-600 text-sm font-plus-jakarta tracking-wide transition-opacity hover:opacity-80" href="#">Privacy</a>
+<a class="text-stone-500 hover:text-rose-600 text-sm font-plus-jakarta tracking-wide transition-opacity hover:opacity-80" href="#">Terms</a>
+<a class="text-stone-500 hover:text-rose-600 text-sm font-plus-jakarta tracking-wide transition-opacity hover:opacity-80" href="#">Contact</a>
+</div>
+<div class="text-stone-500 text-sm font-plus-jakarta tracking-wide">
+                © 2024 MindMate. All rights reserved.
+            </div>
+</div>
+</footer>
+</body></html>
