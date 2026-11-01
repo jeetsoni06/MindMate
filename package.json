@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.82.0",
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.101.1",
     "abort-controller": "^3.0.0",
     "cohere-ai": "^8.0.0",
