@@ -1,16 +1,18 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Menu, Clock, MoreVertical, PlusCircle, Plus, Check, Sparkles, Edit3 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Menu, Clock, MoreVertical, PlusCircle, Plus, Check, Sparkles, Edit3, Lock } from "lucide-react";
 
 export default function TasksPage() {
+  const router = useRouter();
   const [tasks, setTasks] = useState<any[]>([]);
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [loadingRecs, setLoadingRecs] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [username, setUsername] = useState('');
   
-  // Hardcoding latest mood for now, this could be fetched from global state or context
   const latestMood = 'Slightly Stressed'; 
 
   const imageMap: Record<string, string> = {
@@ -23,15 +25,30 @@ export default function TasksPage() {
     rest: "https://images.unsplash.com/photo-1511295742362-92c96b1cf484?w=600&h=400&fit=crop",
   };
 
+  const getActiveToken = () => {
+    if (typeof window === "undefined") return null;
+    return sessionStorage.getItem("soul_link_id") || localStorage.getItem("soul_link_id");
+  };
+
   useEffect(() => {
+    const user = sessionStorage.getItem("soul_link_username") || localStorage.getItem("soul_link_username") || "";
+    setUsername(user);
     fetchTasks();
     fetchRecommendations();
   }, []);
 
+  const handleLockVault = () => {
+    sessionStorage.removeItem("soul_link_id");
+    sessionStorage.removeItem("soul_link_username");
+    localStorage.removeItem("soul_link_id");
+    router.replace("/auth");
+  };
+
   const fetchRecommendations = async () => {
     setLoadingRecs(true);
     try {
-      const token = localStorage.getItem('soul_link_id');
+      const token = getActiveToken();
+      if (!token) return;
       const res = await fetch('/api/tasks/recommend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -50,7 +67,9 @@ export default function TasksPage() {
 
   const fetchTasks = async () => {
     try {
-      const res = await fetch('/api/tasks');
+      const token = getActiveToken();
+      if (!token) return;
+      const res = await fetch(`/api/tasks?userId=${encodeURIComponent(token)}`);
       const data = await res.json();
       if (data.tasks) {
         setTasks(data.tasks);
@@ -63,7 +82,7 @@ export default function TasksPage() {
   const handleToggle = async (task: any) => {
     setTasks(prev => prev.map(t => t.id === task.id ? { ...t, is_completed: !t.is_completed } : t));
     try {
-      const token = localStorage.getItem('soul_link_id');
+      const token = getActiveToken();
       await fetch('/api/tasks', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -77,7 +96,7 @@ export default function TasksPage() {
   const handleAddRec = async (rec: any) => {
     setIsAdding(true);
     try {
-      const token = localStorage.getItem('soul_link_id');
+      const token = getActiveToken();
       const res = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -96,7 +115,7 @@ export default function TasksPage() {
     if(!newTaskTitle.trim()) return;
     setIsAdding(true);
     try {
-      const token = localStorage.getItem('soul_link_id');
+      const token = getActiveToken();
       const res = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -119,15 +138,28 @@ export default function TasksPage() {
   const completionPercentage = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
 
   return (
-    <div className="flex flex-col pt-4 px-6 max-w-2xl mx-auto overflow-y-auto scrollbar-hide">
+    <div className="flex flex-col pt-4 px-6 max-w-2xl mx-auto overflow-y-auto scrollbar-hide pb-20">
       {/* Top Header */}
       <header className="flex justify-between items-center py-4 mb-4">
-        <Menu size={20} className="text-gray-400" />
-        <div className="flex items-center justify-center font-bold text-[#FE005B] text-lg">
-          Mindmate
+        <div className="flex items-center gap-2 text-[#FE005B] font-bold tracking-tight">
+          <Sparkles size={20} className="text-[#FE005B]" />
+          <span className="text-base uppercase tracking-wider">Mindmate</span>
         </div>
-        <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden shadow-sm">
-          <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop" alt="Profile" className="w-full h-full object-cover" />
+
+        <div className="flex items-center gap-3">
+          {username && (
+            <span className="text-xs font-semibold text-gray-500 bg-pink-50 px-2.5 py-1 rounded-full border border-pink-100">
+              Vault: {username}
+            </span>
+          )}
+          <button
+            onClick={handleLockVault}
+            title="Lock Sanctuary Vault"
+            className="flex items-center gap-1.5 text-xs font-bold text-[#b42243] bg-white border border-[#b42243]/20 px-3 py-1.5 rounded-full hover:bg-pink-50 transition-all shadow-sm active:scale-95 cursor-pointer"
+          >
+            <Lock size={13} />
+            <span>Lock</span>
+          </button>
         </div>
       </header>
 
@@ -153,9 +185,9 @@ export default function TasksPage() {
       {/* Today's Rituals */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-lg font-bold text-gray-900">Today's Rituals</h2>
-        <button className="text-[11px] font-bold text-[#FE005B] hover:underline uppercase tracking-wider">
-           View All
-        </button>
+        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+          Personal
+        </span>
       </div>
 
       <div className="space-y-3 mb-10">

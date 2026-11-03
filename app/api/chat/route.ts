@@ -24,6 +24,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized: Active Vault session required' }, { status: 401 });
+    }
+
     const recentContext = await getChatContext(userId);
 
     // Save User Message

@@ -1,25 +1,48 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { getJournals, supabase } from "@/lib/supabase";
 import JournalCard from "@/components/JournalCard";
 import JournalInput from "@/components/JournalInput";
-import { Plus, Bell, Sparkles } from "lucide-react";
+import { Plus, Bell, Sparkles, Lock, LogOut } from "lucide-react";
 
 export default function JournalPage() {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [journals, setJournals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState("");
 
   useEffect(() => {
+    const user = sessionStorage.getItem("soul_link_username") || localStorage.getItem("soul_link_username") || "";
+    setUsername(user);
     loadJournals();
   }, []);
 
+  const getActiveToken = () => {
+    if (typeof window === "undefined") return null;
+    return sessionStorage.getItem("soul_link_id") || localStorage.getItem("soul_link_id");
+  };
+
   const loadJournals = async () => {
     setLoading(true);
-    const data = await getJournals();
+    const token = getActiveToken();
+    if (!token) {
+      setJournals([]);
+      setLoading(false);
+      return;
+    }
+    const data = await getJournals(token);
     setJournals(data);
     setLoading(false);
+  };
+
+  const handleLockVault = () => {
+    sessionStorage.removeItem("soul_link_id");
+    sessionStorage.removeItem("soul_link_username");
+    localStorage.removeItem("soul_link_id");
+    router.replace("/auth");
   };
 
   const handleSaveEntry = async (text: string, file: File | null) => {
@@ -28,7 +51,9 @@ export default function JournalPage() {
       if (file) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage.from('journal-photos').upload(`public/${fileName}`, file, { cacheControl: '3600', upsert: false });
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('journal-photos')
+          .upload(`public/${fileName}`, file, { cacheControl: '3600', upsert: false });
         
         if (uploadError) {
           console.error("Upload error:", uploadError);
@@ -39,13 +64,19 @@ export default function JournalPage() {
         }
       }
 
-      const token = localStorage.getItem('soul_link_id');
+      const token = getActiveToken();
+      if (!token) {
+        alert("Session expired. Please unlock your vault again.");
+        router.replace("/auth");
+        return;
+      }
+
       const res = await fetch('/api/journal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ journalText: text, userId: token, imageUrl })
       });
-      if(res.ok) {
+      if (res.ok) {
         await loadJournals();
       } else {
         alert("Failed to save entry.");
@@ -98,7 +129,22 @@ export default function JournalPage() {
           <Sparkles size={20} className="text-[#FE005B]" />
           <span className="text-base uppercase tracking-wider">Mindmate</span>
         </div>
-        <Bell size={20} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer" strokeWidth={2.5} />
+        
+        <div className="flex items-center gap-3">
+          {username && (
+            <span className="text-xs font-semibold text-gray-500 bg-pink-50 px-2.5 py-1 rounded-full border border-pink-100">
+              Vault: {username}
+            </span>
+          )}
+          <button
+            onClick={handleLockVault}
+            title="Lock Sanctuary Vault"
+            className="flex items-center gap-1.5 text-xs font-bold text-[#b42243] bg-white border border-[#b42243]/20 px-3 py-1.5 rounded-full hover:bg-pink-50 transition-all shadow-sm active:scale-95 cursor-pointer"
+          >
+            <Lock size={13} />
+            <span>Lock</span>
+          </button>
+        </div>
       </header>
 
       {/* Hero Editorial Section */}
@@ -133,9 +179,9 @@ export default function JournalPage() {
 
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-[15px] font-bold text-gray-900 uppercase tracking-widest">Recent Entries</h2>
-        <button className="text-[10px] font-bold text-[#FE005B] hover:opacity-80 transition-opacity flex items-center gap-1 uppercase tracking-widest">
-           View Archive &rarr;
-        </button>
+        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+          Private Vault
+        </span>
       </div>
 
       <div className="flex flex-col gap-0 pb-16">
@@ -150,37 +196,36 @@ export default function JournalPage() {
               <Sparkles className="text-[#296b38]/40" size={48} />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">No entries yet</h3>
-            <p className="text-[#594042] max-w-xs mb-8 text-sm leading-relaxed">Your sanctuary is waiting. Begin your journey of self-discovery.</p>
-            <button onClick={() => setIsModalOpen(true)} className="bg-[#b42243] text-white px-8 py-3 rounded-full font-bold shadow-lg flex items-center gap-2 hover:scale-105 transition-transform">
-              <Plus size={18} />
-              Start Your First Entry
+            <p className="text-[#594042] text-sm max-w-xs mb-6">Your private thoughts will appear here once you write them down.</p>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-[#b42243] text-white px-6 py-2.5 rounded-full font-bold shadow-md hover:bg-[#9a1a36] transition-all text-sm"
+            >
+              Write First Reflection
             </button>
           </div>
         ) : (
-          journals.map((journal) => (
-            <JournalCard key={journal.id} journal={journal} />
+          journals.map((entry) => (
+            <JournalCard key={entry.id} journal={entry} />
           ))
         )}
       </div>
 
-      <JournalInput 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSave={handleSaveEntry} 
-      />
-
       {/* Floating Action Button */}
-      {!isModalOpen && (
-        <div className="fixed right-6 bottom-28 z-40">
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="w-14 h-14 bg-gradient-to-tr from-[#b42243] to-[#ff5c77] text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all outline-none"
-            aria-label="New Entry"
-          >
-            <Plus size={28} strokeWidth={2.5} />
-          </button>
-        </div>
-      )}
+      <button
+        onClick={() => setIsModalOpen(true)}
+        className="fixed bottom-24 right-6 w-14 h-14 bg-[#b42243] text-white rounded-full flex items-center justify-center shadow-xl shadow-[#b42243]/30 hover:scale-105 active:scale-95 transition-all z-40 cursor-pointer"
+        aria-label="New Journal Entry"
+      >
+        <Plus size={28} />
+      </button>
+
+      {/* Input Modal */}
+      <JournalInput
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveEntry}
+      />
     </main>
   );
 }

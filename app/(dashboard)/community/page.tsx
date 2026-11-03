@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Sprout, Sparkles, Mountain, Leaf, Link } from 'lucide-react';
-import Image from 'next/image';
+import { ArrowLeft, Plus, Sprout, Sparkles, Mountain, Leaf, Lock } from 'lucide-react';
 import CommunityModal from '@/components/CommunityModal';
 import { useRouter } from 'next/navigation';
 
@@ -21,10 +20,20 @@ export default function CommunityPage() {
   const [stories, setStories] = useState<Story[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState('');
 
   useEffect(() => {
+    const user = sessionStorage.getItem("soul_link_username") || localStorage.getItem("soul_link_username") || "";
+    setUsername(user);
     fetchStories();
   }, []);
+
+  const handleLockVault = () => {
+    sessionStorage.removeItem("soul_link_id");
+    sessionStorage.removeItem("soul_link_username");
+    localStorage.removeItem("soul_link_id");
+    router.replace("/auth");
+  };
 
   const fetchStories = async () => {
     try {
@@ -48,7 +57,6 @@ export default function CommunityPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, content })
       });
-      // Re-fetch stories after submission, though in a real app it might be awaiting vetting
       await fetchStories();
     } catch (error) {
       console.error("Error submitting story", error);
@@ -73,7 +81,7 @@ export default function CommunityPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          <button onClick={() => router.back()} className="text-[#b5173f] active:scale-95 transition-transform">
+          <button onClick={() => router.back()} className="text-[#b5173f] active:scale-95 transition-transform cursor-pointer">
             <ArrowLeft strokeWidth={2.5} size={24} />
           </button>
           <div>
@@ -85,9 +93,21 @@ export default function CommunityPage() {
             </p>
           </div>
         </div>
-        <div className="w-10 h-10 rounded-full border border-gray-200 overflow-hidden bg-white shadow-sm flex items-center justify-center">
-          {/* Fallback to emoji if no user image available */}
-          <span className="text-2xl">👨‍💼</span>
+
+        <div className="flex items-center gap-3">
+          {username && (
+            <span className="text-xs font-semibold text-gray-500 bg-pink-50 px-2.5 py-1 rounded-full border border-pink-100 hidden sm:inline">
+              Vault: {username}
+            </span>
+          )}
+          <button
+            onClick={handleLockVault}
+            title="Lock Sanctuary Vault"
+            className="flex items-center gap-1.5 text-xs font-bold text-[#b42243] bg-white border border-[#b42243]/20 px-3 py-1.5 rounded-full hover:bg-pink-50 transition-all shadow-sm active:scale-95 cursor-pointer"
+          >
+            <Lock size={13} />
+            <span>Lock</span>
+          </button>
         </div>
       </div>
 
@@ -154,7 +174,7 @@ export default function CommunityPage() {
                   {story.content}
                 </p>
 
-                <button className="text-[#C53F54] font-bold text-[15px] flex items-center gap-1 hover:text-[#9e3343] transition-colors">
+                <button className="text-[#C53F54] font-bold text-[15px] flex items-center gap-1 hover:text-[#9e3343] transition-colors cursor-pointer">
                   {index === 0 ? 'Read More' : 'Read full journey'} <ArrowLeft className="rotate-180 ml-1" size={16} strokeWidth={3} />
                 </button>
               </div>
@@ -167,7 +187,7 @@ export default function CommunityPage() {
       <div className="fixed bottom-24 right-6 z-40">
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-[#FE005B] text-white px-6 py-4 rounded-full font-bold shadow-xl shadow-[#FE005B]/30 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all"
+          className="bg-[#FE005B] text-white px-6 py-4 rounded-full font-bold shadow-xl shadow-[#FE005B]/30 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all cursor-pointer"
         >
           <Plus size={20} strokeWidth={3} />
           <span className="text-[17px]">Share Story</span>

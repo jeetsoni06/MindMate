@@ -11,30 +11,33 @@ if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_A
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export function getVaultId(passedId?: string): string {
-  // Use the passed ID if provided, otherwise read from localStorage (client-side)
-  if (passedId) return passedId;
-  if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem('soul_link_id');
-    if (stored) return stored;
+  if (passedId && passedId !== 'null' && passedId !== 'undefined' && passedId.trim() !== '') {
+    return passedId.trim();
   }
-  // Fallback: anonymous UUID (should never reach here if AuthGuard is working)
-  return '00000000-0000-0000-0000-000000000000';
+  if (typeof window !== 'undefined') {
+    const sessionToken = sessionStorage.getItem('soul_link_id');
+    if (sessionToken && sessionToken.trim() !== '') return sessionToken.trim();
+    const localToken = localStorage.getItem('soul_link_id');
+    if (localToken && localToken.trim() !== '') return localToken.trim();
+  }
+  return '';
 }
 
 /**
  * Saves a new journal entry to the Supabase 'journals' table.
- * 
- * @param text The text content of the journal entry
  */
 export async function saveJournalEntry(text: string, userId?: string, imageUrl?: string) {
   const activeUserId = getVaultId(userId);
+
+  if (!activeUserId) {
+    throw new Error("Unauthorized: You must unlock your vault to save journal entries.");
+  }
 
   const payload: any = {
     user_id: activeUserId,
     content_text: text,
   };
 
-  // Only include if truthy to avoid schema issues if undefined
   if (imageUrl) {
     payload.image_url = imageUrl;
   }
@@ -51,12 +54,9 @@ export async function saveJournalEntry(text: string, userId?: string, imageUrl?:
 
   const newEntry = data;
   const newId = data.id;
-  console.log('UPDATING ROW ID:', newId);
 
   // Call the AI analysis API route
   try {
-    // Note: If this function runs on the server (Server Action), fetch with absolute URL is needed.
-    // Assuming standard client-side call for now based on current app state.
     const baseUrl = typeof window !== 'undefined' ? '' : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
     const aiResponse = await fetch(`${baseUrl}/api/analyze-mood`, {
@@ -69,14 +69,14 @@ export async function saveJournalEntry(text: string, userId?: string, imageUrl?:
       const aiData = await aiResponse.json();
 
       if (aiData.mindfulness_theme !== undefined) {
-        // UPDATE the row with ai_mood_label (storing the theme) and wellness_tip
         const { error: updateError } = await supabase
           .from('journals')
           .update({
             ai_mood_label: aiData.mindfulness_theme,
             wellness_tip: aiData.wellness_tip
           })
-          .eq('id', newId);
+          .eq('id', newId)
+          .eq('user_id', activeUserId);
 
         if (updateError) {
           console.error("Error updating journal with AI data:", updateError);
@@ -85,8 +85,6 @@ export async function saveJournalEntry(text: string, userId?: string, imageUrl?:
           newEntry.wellness_tip = aiData.wellness_tip;
         }
       }
-    } else {
-      console.error("AI Analysis API failed with status:", aiResponse.status);
     }
   } catch (err) {
     console.error("Error during AI analysis fetch:", err);
@@ -96,10 +94,14 @@ export async function saveJournalEntry(text: string, userId?: string, imageUrl?:
 }
 
 /**
- * Fetches all journal entries for the current user and maps them to UI-friendly objects.
+ * Fetches all journal entries strictly for the current user.
  */
 export async function getJournals(userId?: string) {
   const activeUserId = getVaultId(userId);
+
+  if (!activeUserId) {
+    return [];
+  }
 
   try {
     const { data, error } = await supabase
@@ -108,16 +110,12 @@ export async function getJournals(userId?: string) {
       .eq('user_id', activeUserId)
       .order('created_at', { ascending: false });
 
-    console.log("Supabase Raw Data:", data);
-
     if (error) {
       console.error("Error fetching journals:", error);
       return [];
     }
 
-    if (!data) {
-      return [];
-    }
+    if (!data) return [];
 
     return data.map((entry) => ({
       id: entry.id,
@@ -128,51 +126,44 @@ export async function getJournals(userId?: string) {
       image_url: entry.image_url
     }));
   } catch (err) {
-    console.error("Network or execution error fetching journals:", err);
+    console.error("Network error fetching journals:", err);
     return [];
   }
 }
 
 /**
- * Fetches the last 3 entries from the journals table and combines them into a single string.
- * This is used to provide recent mood context to the Chatbot.
+ * Fetches the last 3 entries from the journals table for user context.
  */
-export async function getRecentContext() {
-  const dummyUserId = "00000000-0000-0000-0000-000000000000";
+export async function getRecentContext(userId?: string) {
+  const activeUserId = getVaultId(userId);
+  if (!activeUserId) return "";
 
   const { data, error } = await supabase
     .from('journals')
     .select('content_text')
-    .eq('user_id', dummyUserId)
+    .eq('user_id', activeUserId)
     .order('created_at', { ascending: false })
     .limit(3);
 
-  if (error) {
-    console.error("Error fetching recent context:", error);
+  if (error || !data || data.length === 0) {
     return "";
   }
 
-  if (!data || data.length === 0) {
-    return "";
-  }
-
-  // Combine the text of the entries
   return data.map((entry) => entry.content_text).join('\n---\n');
 }
 
 /**
- * Sends a chat message to the AI Friend, saves the user message, attempts Anthropic API,
- * and saves the AI response.
- * Fallbacks to supportive messages on 401 or other API errors.
+ * Sends a chat message for the authenticated user.
  */
-export async function sendMessage(message: string) {
-  const dummyUserId = "00000000-0000-0000-0000-000000000000";
+export async function sendMessage(message: string, userId?: string) {
+  const activeUserId = getVaultId(userId);
+  if (!activeUserId) throw new Error("User not authenticated");
 
   // 1. Insert user message
   const { error: insertUserError } = await supabase
     .from('chat_messages')
     .insert([{
-      user_id: dummyUserId,
+      user_id: activeUserId,
       role: 'user',
       content: message
     }]);
@@ -187,51 +178,13 @@ export async function sendMessage(message: string) {
     "I'm here for you. Take a deep breath—we can work through this."
   ];
 
-  let aiResponseText = "";
+  const randomIndex = Math.floor(Math.random() * FALLBACK_RESPONSES.length);
+  const aiResponseText = FALLBACK_RESPONSES[randomIndex];
 
-  try {
-    const anthropicKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY || "";
-
-    if (!anthropicKey) {
-      throw new Error("Missing API Key (Simulated 401)");
-    }
-
-    const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": anthropicKey,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-3-haiku-20240307",
-        max_tokens: 300,
-        messages: [{ role: "user", content: message }]
-      })
-    });
-
-    if (!aiRes.ok) {
-      throw new Error(`Anthropic error: ${aiRes.status}`);
-    }
-
-    const aiData = await aiRes.json();
-    if (aiData.content && aiData.content[0]?.type === 'text') {
-      aiResponseText = aiData.content[0].text;
-    } else {
-      throw new Error("Unexpected AI response format");
-    }
-  } catch (error) {
-    console.error("Anthropic logic error / 401 triggered:", error);
-    // Pick a random fallback response
-    const randomIndex = Math.floor(Math.random() * FALLBACK_RESPONSES.length);
-    aiResponseText = FALLBACK_RESPONSES[randomIndex];
-  }
-
-  // 2. Insert AI response back into the table
   const { data: aiMessageData, error: aiInsertErr } = await supabase
     .from('chat_messages')
     .insert([{
-      user_id: dummyUserId,
+      user_id: activeUserId,
       role: 'assistant',
       content: aiResponseText
     }])
@@ -250,11 +203,11 @@ export async function sendMessage(message: string) {
 }
 
 /**
- * Fetches the latest 3 journal entries for comprehensive context.
- * Gives the AI Friend the user's broad recent emotional baseline.
+ * Fetches latest 3 journal entries for AI Friend context.
  */
 export async function getChatContext(userId?: string) {
   const activeUserId = getVaultId(userId);
+  if (!activeUserId) return "";
 
   const { data, error } = await supabase
     .from('journals')
@@ -272,11 +225,11 @@ export async function getChatContext(userId?: string) {
 }
 
 /**
- * Fetches the last 2 chat messages for the current user for Smart Fallback logic.
- * Ordered by creation time (newest first).
+ * Fetches last 2 chat messages for current user.
  */
 export async function getChatHistory(userId?: string) {
   const activeUserId = getVaultId(userId);
+  if (!activeUserId) return [];
 
   const { data, error } = await supabase
     .from('chat_messages')
@@ -294,33 +247,25 @@ export async function getChatHistory(userId?: string) {
 }
 
 /**
- * Calculates the weekly mood summary based on the ai_mood_score of journals from the last 7 days.
- * Returns 'Thriving', 'Stable', or 'Needs Self-Care' based on the average score.
+ * Calculates weekly mood summary.
  */
 export async function getWeeklyMoodSummary(userId?: string) {
   const activeUserId = getVaultId(userId);
+  if (!activeUserId) return "Stable";
 
-  // 1. Get the date 7 days ago
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-  // 2. Fetch all journals for the user in the last 7 days
   const { data, error } = await supabase
     .from('journals')
     .select('ai_mood_score')
     .eq('user_id', activeUserId)
     .gte('created_at', sevenDaysAgo.toISOString());
 
-  if (error) {
-    console.error("Error fetching weekly mood data:", error);
-    return "Stable"; // Fallback summary on error
+  if (error || !data || data.length === 0) {
+    return "Stable";
   }
 
-  if (!data || data.length === 0) {
-    return "Stable"; // Default if no journals
-  }
-
-  // Calculate average
   let totalScore = 0;
   let count = 0;
 
@@ -332,25 +277,19 @@ export async function getWeeklyMoodSummary(userId?: string) {
   }
 
   if (count === 0) return "Stable";
-
   const average = totalScore / count;
 
-  // Categorization Logic
-  if (average > 8) {
-    return "Thriving";
-  } else if (average >= 5) {
-    return "Stable";
-  } else {
-    return "Needs Self-Care";
-  }
+  if (average > 8) return "Thriving";
+  if (average >= 5) return "Stable";
+  return "Needs Self-Care";
 }
 
 /**
- * Inserts a highly generalized chat message into the chat_messages table.
- * Used for both user inputs and AI assistant replies.
+ * Inserts a chat message.
  */
 export async function saveChatMessage(content: string, role: 'user' | 'assistant', userId?: string) {
   const activeUserId = getVaultId(userId);
+  if (!activeUserId) return null;
 
   const { data, error } = await supabase
     .from('chat_messages')
@@ -386,7 +325,7 @@ export async function verifyVault(username: string, pin: string) {
     .single();
 
   if (error || !data) {
-    return { success: false, error: "Invalid Vault ID or Pin." };
+    return { success: false, error: "Invalid Vault Name or PIN." };
   }
 
   return { success: true, user: data };
@@ -408,17 +347,14 @@ export async function createVault(username: string, pin: string, question: strin
     .single();
 
   if (error) {
-    return { success: false, error: "Username already exists or database error." };
+    return { success: false, error: "Vault Name already exists. Please choose a different name." };
   }
   return { success: true, user: data };
 }
 
-/**
- * Fetches all localized messages for the current session loop.
- * (Works identically to getChatHistory but specifically named for the UI component hooks).
- */
 export async function getChatMessages(userId?: string) {
   const activeUserId = getVaultId(userId);
+  if (!activeUserId) return [];
 
   try {
     const { data, error } = await supabase
@@ -427,20 +363,14 @@ export async function getChatMessages(userId?: string) {
       .eq('user_id', activeUserId)
       .order('created_at', { ascending: true });
 
-    console.log("Supabase Raw Chat Data:", data);
-
     if (error) {
       console.error("Error fetching chat messages:", error);
       return [];
     }
 
-    if (!data) {
-      return [];
-    }
-
-    return data;
+    return data || [];
   } catch (err) {
-    console.error("Network or execution error fetching chat messages:", err);
+    console.error("Network error fetching chat messages:", err);
     return [];
   }
 }
@@ -451,18 +381,15 @@ export async function getChatMessages(userId?: string) {
 
 export async function getTasks(userId?: string) {
   const activeUserId = getVaultId(userId);
-  const queryUserId = activeUserId === "00000000-0000-0000-0000-000000000000" ? null : activeUserId;
-  
-  try {
-    let query = supabase.from('tasks').select('*').order('created_at', { ascending: true });
-    
-    if (queryUserId === null) {
-      query = query.is('user_id', null);
-    } else {
-      query = query.eq('user_id', queryUserId);
-    }
+  if (!activeUserId) return [];
 
-    const { data, error } = await query;
+  try {
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('user_id', activeUserId)
+      .order('created_at', { ascending: true });
+
     if (error) throw error;
     return data || [];
   } catch (err) {
@@ -473,13 +400,13 @@ export async function getTasks(userId?: string) {
 
 export async function addTask(payload: { title: string, subtitle?: string, icon_name?: string }, userId?: string) {
   const activeUserId = getVaultId(userId);
-  const insertUserId = activeUserId === "00000000-0000-0000-0000-000000000000" ? null : activeUserId;
-  
+  if (!activeUserId) throw new Error("Unauthorized: Cannot add task without user ID");
+
   try {
     const { data, error } = await supabase
       .from('tasks')
       .insert([{
-        user_id: insertUserId,
+        user_id: activeUserId,
         title: payload.title,
         subtitle: payload.subtitle || null,
         icon_name: payload.icon_name || null
@@ -487,7 +414,6 @@ export async function addTask(payload: { title: string, subtitle?: string, icon_
       .select().single();
 
     if (error) throw error;
-
     return data;
   } catch (err: any) {
     console.error("Error adding task:", err);
@@ -496,22 +422,16 @@ export async function addTask(payload: { title: string, subtitle?: string, icon_
 }
 
 export async function toggleTaskCompleted(taskId: string, currentStatus: boolean, userId?: string) {
-  const activeUserId = getVaultId(userId); 
-  const updateUserId = activeUserId === "00000000-0000-0000-0000-000000000000" ? null : activeUserId;
-  
+  const activeUserId = getVaultId(userId);
+  if (!activeUserId) return null;
+
   try {
-    let query = supabase
+    const { data, error } = await supabase
       .from('tasks')
       .update({ is_completed: !currentStatus })
-      .eq('id', taskId);
-      
-    if (updateUserId === null) {
-      query = query.is('user_id', null);
-    } else {
-      query = query.eq('user_id', updateUserId);
-    }
-      
-    const { data, error } = await query.select().single();
+      .eq('id', taskId)
+      .eq('user_id', activeUserId)
+      .select().single();
 
     if (error) throw error;
     return data;
