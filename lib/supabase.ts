@@ -10,12 +10,15 @@ if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_A
 // Initialize the Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Helper to extract the Vault ID securely
 export function getVaultId(passedId?: string): string {
-  // Demo Mode override: Supabase database strictly requires a 36-character UUID format 
-  // for the journals and chat_messages foreign keys. "demo-user-123" will throw a Postgres error.
-  // We use this universal UUID dummy instead:
-  return "00000000-0000-0000-0000-000000000000";
+  // Use the passed ID if provided, otherwise read from localStorage (client-side)
+  if (passedId) return passedId;
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('soul_link_id');
+    if (stored) return stored;
+  }
+  // Fallback: anonymous UUID (should never reach here if AuthGuard is working)
+  return '00000000-0000-0000-0000-000000000000';
 }
 
 /**

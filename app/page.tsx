@@ -17,7 +17,7 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-4">
             <Link href="/auth" className="text-[#b42243] px-6 py-2 rounded-full border border-[#b42243]/20 font-bold hover:bg-[#ffdadc]/30 transition-all text-sm">Sign In</Link>
-            <Link href="/journal" className="bg-[#b42243] text-white px-6 py-2.5 rounded-full font-bold shadow-lg shadow-[#b42243]/20 hover:scale-105 transition-all text-sm">Enter Sanctuary</Link>
+            <Link href="/auth" className="bg-[#b42243] text-white px-6 py-2.5 rounded-full font-bold shadow-lg shadow-[#b42243]/20 hover:scale-105 transition-all text-sm">Enter Sanctuary</Link>
           </div>
         </nav>
       </header>
@@ -38,10 +38,10 @@ export default function LandingPage() {
               Journal your thoughts, talk to your AI companion, and build a mindful routine that grows with you.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-10 p-5">
-              <Link href="/journal" className="bg-[#b42243] hover:bg-[#ff5c77] text-white px-10 py-4 rounded-full text-lg font-bold transition-all shadow-xl shadow-[#b42243]/20">
+              <Link href="/auth" className="bg-[#b42243] hover:bg-[#ff5c77] text-white px-10 py-4 rounded-full text-lg font-bold transition-all shadow-xl shadow-[#b42243]/20">
                 Get Started
               </Link>
-              <Link href="/chat" className="bg-white/50 backdrop-blur-md border border-[#e1bec0]/50 text-[#191c1b] px-10 py-4 rounded-full text-lg font-bold hover:bg-white transition-all shadow-sm">
+              <Link href="/auth" className="bg-white/50 backdrop-blur-md border border-[#e1bec0]/50 text-[#191c1b] px-10 py-4 rounded-full text-lg font-bold hover:bg-white transition-all shadow-sm">
                 Try AI Friend
               </Link>
             </div>
@@ -131,7 +131,7 @@ export default function LandingPage() {
             <div className="relative z-10">
               <h2 className="text-white text-4xl md:text-6xl font-extrabold mb-8 tracking-tight">Ready to find your peace?</h2>
               <p className="text-[#ffdadc]/90 text-xl md:text-2xl mb-12 max-w-2xl mx-auto font-medium leading-relaxed">Join thousands of others who have found a safe harbor in MindMate. Start your journey today for free.</p>
-              <Link href="/journal" className="bg-white text-[#b42243] hover:bg-[#ffdadc] hover:text-[#40000f] px-12 py-5 rounded-full text-xl font-bold transition-all shadow-xl inline-block hover:scale-105 active:scale-95">
+              <Link href="/auth" className="bg-white text-[#b42243] hover:bg-[#ffdadc] hover:text-[#40000f] px-12 py-5 rounded-full text-xl font-bold transition-all shadow-xl inline-block hover:scale-105 active:scale-95">
                  Create Your Sanctuary
               </Link>
             </div>
