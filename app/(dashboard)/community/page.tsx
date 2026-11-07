@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Sprout, Sparkles, Mountain, Leaf, Lock } from 'lucide-react';
+import { ArrowLeft, Sprout, Sparkles, Mountain, Leaf, LogOut } from 'lucide-react';
 import CommunityModal from '@/components/CommunityModal';
 import { useRouter } from 'next/navigation';
 
@@ -95,18 +95,13 @@ export default function CommunityPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          {username && (
-            <span className="text-xs font-semibold text-gray-500 bg-pink-50 px-2.5 py-1 rounded-full border border-pink-100 hidden sm:inline">
-              Vault: {username}
-            </span>
-          )}
           <button
             onClick={handleLockVault}
-            title="Lock Sanctuary Vault"
+            title="Back to Login"
             className="flex items-center gap-1.5 text-xs font-bold text-[#b42243] bg-white border border-[#b42243]/20 px-3 py-1.5 rounded-full hover:bg-pink-50 transition-all shadow-sm active:scale-95 cursor-pointer"
           >
-            <Lock size={13} />
-            <span>Lock</span>
+            <LogOut size={13} />
+            <span>Back to Login</span>
           </button>
         </div>
       </div>
@@ -135,6 +130,11 @@ export default function CommunityPage() {
             <div className="h-64 bg-white/50 rounded-[32px]"></div>
             <div className="h-64 bg-white/50 rounded-[32px]"></div>
           </div>
+        ) : stories.length === 0 ? (
+          <div className="bg-white rounded-[32px] p-12 text-center border border-gray-100 shadow-sm">
+            <p className="text-gray-500 font-medium">No stories shared yet.</p>
+            <p className="text-xs text-gray-400 mt-1">Be the first to share your journey with the community.</p>
+          </div>
         ) : (
           <div className="space-y-6">
             {stories.map((story, index) => (
@@ -147,11 +147,6 @@ export default function CommunityPage() {
                 {/* Author Section */}
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      story.authorIcon === 'sparkles' ? 'bg-red-50' : 'bg-[#e2f1e6]'
-                    }`}>
-                      {getIcon(story.authorIcon)}
-                    </div>
                     <span className={`text-[13px] font-bold tracking-widest ${
                       story.authorIcon === 'sparkles' ? 'text-[#C53F54]' : 'text-[#166534]'
                     }`}>
@@ -175,7 +170,7 @@ export default function CommunityPage() {
                 </p>
 
                 <button className="text-[#C53F54] font-bold text-[15px] flex items-center gap-1 hover:text-[#9e3343] transition-colors cursor-pointer">
-                  {index === 0 ? 'Read More' : 'Read full journey'} <ArrowLeft className="rotate-180 ml-1" size={16} strokeWidth={3} />
+                  Read full story <ArrowLeft className="rotate-180 ml-1" size={16} strokeWidth={3} />
                 </button>
               </div>
             ))}
@@ -187,10 +182,9 @@ export default function CommunityPage() {
       <div className="fixed bottom-24 right-6 z-40">
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-[#FE005B] text-white px-6 py-4 rounded-full font-bold shadow-xl shadow-[#FE005B]/30 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          className="bg-[#FE005B] text-white px-4 py-2.5 rounded-full font-bold text-sm shadow-md shadow-[#FE005B]/20 hover:scale-105 active:scale-95 transition-all cursor-pointer"
         >
-          <Plus size={20} strokeWidth={3} />
-          <span className="text-[17px]">Share Story</span>
+          Add My Story
         </button>
       </div>
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Menu, Clock, MoreVertical, PlusCircle, Plus, Check, Sparkles, Edit3, Lock } from "lucide-react";
+import { Menu, Clock, MoreVertical, PlusCircle, Plus, Check, Sparkles, Edit3, LogOut } from "lucide-react";
 
 export default function TasksPage() {
   const router = useRouter();
@@ -147,18 +147,13 @@ export default function TasksPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          {username && (
-            <span className="text-xs font-semibold text-gray-500 bg-pink-50 px-2.5 py-1 rounded-full border border-pink-100">
-              Vault: {username}
-            </span>
-          )}
           <button
             onClick={handleLockVault}
-            title="Lock Sanctuary Vault"
+            title="Back to Login"
             className="flex items-center gap-1.5 text-xs font-bold text-[#b42243] bg-white border border-[#b42243]/20 px-3 py-1.5 rounded-full hover:bg-pink-50 transition-all shadow-sm active:scale-95 cursor-pointer"
           >
-            <Lock size={13} />
-            <span>Lock</span>
+            <LogOut size={13} />
+            <span>Back to Login</span>
           </button>
         </div>
       </header>

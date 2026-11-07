@@ -3,17 +3,29 @@ import { saveJournalEntry } from '../../../lib/supabase';
 
 export async function POST(req: Request) {
   try {
-    const { journalText, userId, imageUrl } = await req.json();
+    const { title, journalText, userId, imageUrl } = await req.json();
 
     if (!userId || typeof userId !== 'string' || !userId.trim()) {
       return NextResponse.json({ error: "Unauthorized: Active Vault session required" }, { status: 401 });
     }
 
-    if ((!journalText || typeof journalText !== 'string' || !journalText.trim()) && !imageUrl) {
-      return NextResponse.json({ error: "Valid journal text or a photo is required" }, { status: 400 });
+    const cleanTitle = (typeof title === 'string') ? title.trim() : "";
+    const cleanBody = (typeof journalText === 'string') ? journalText.trim() : "";
+
+    if (!cleanTitle && !cleanBody && !imageUrl) {
+      return NextResponse.json({ error: "A title, reflection text, or a photo is required" }, { status: 400 });
     }
 
-    const finalJournalText = (!journalText || !journalText.trim()) ? "Uploaded a visual memory" : journalText.trim();
+    let finalJournalText = "";
+    if (cleanTitle && cleanBody) {
+      finalJournalText = `# ${cleanTitle}\n\n${cleanBody}`;
+    } else if (cleanTitle) {
+      finalJournalText = `# ${cleanTitle}`;
+    } else if (cleanBody) {
+      finalJournalText = cleanBody;
+    } else {
+      finalJournalText = "Uploaded a visual memory";
+    }
 
     // Call saveJournalEntry with the specific user's ID
     const newEntryArray = await saveJournalEntry(finalJournalText, userId.trim(), imageUrl);
