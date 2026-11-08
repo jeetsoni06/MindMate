@@ -74,10 +74,18 @@ export default function ChatPage() {
 
     try {
       const token = getActiveToken();
+      // Ensure history sent to Gemini starts from actual conversation turns
+      const conversationHistory = messages.filter((m, idx) => {
+        if (idx === 0 && m.role === 'assistant' && m.content.startsWith('Hi! I am MindMate')) {
+          return false;
+        }
+        return true;
+      });
+
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg, history: messages, userId: token })
+        body: JSON.stringify({ message: userMsg, history: conversationHistory, userId: token })
       });
       const data = await res.json();
       if(data.reply) {

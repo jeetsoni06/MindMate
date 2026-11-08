@@ -3,6 +3,7 @@ import { getChatContext, getChatHistory } from '../../../../lib/supabase';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const CANDIDATE_MODELS = ['gemini-3.5-flash', 'gemini-3.8-flash'];
 
 const FALLBACK_RECS = [
   {
@@ -50,11 +51,20 @@ Return ONLY a JSON array, no extra text, no markdown. Format MUST match exactly:
   }
 ]`;
 
-    try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-      const result = await model.generateContent(promptText);
-      const textResponse = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
+    let textResponse = '';
+    for (const modelName of CANDIDATE_MODELS) {
+      try {
+        const model = genAI.getGenerativeModel({ model: modelName });
+        const result = await model.generateContent(promptText);
+        const raw = result.response.text();
+        textResponse = raw.replace(/```json/g, '').replace(/```/g, '').trim();
+        if (textResponse) break;
+      } catch (err) {
+        // try next model
+      }
+    }
 
+    if (textResponse) {
       const startIdx = textResponse.indexOf('[');
       const endIdx = textResponse.lastIndexOf(']');
       if (startIdx !== -1 && endIdx !== -1) {
@@ -64,8 +74,6 @@ Return ONLY a JSON array, no extra text, no markdown. Format MUST match exactly:
           return NextResponse.json({ recommendations: parsed });
         }
       }
-    } catch (err) {
-      console.warn('Gemini recommendation failed, using fallback.', err);
     }
 
     return NextResponse.json({ recommendations: FALLBACK_RECS });

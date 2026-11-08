@@ -4,17 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-function generateSmartFallback(message: string): { reply: string; suggestions: string[] } {
-  const GENERIC_RESPONSES = [
-    "I'm here for you. Take your time.",
-    "That sounds challenging. Do you want to unpack that?",
-    "I appreciate you sharing this.",
-  ];
-  return {
-    reply: GENERIC_RESPONSES[Math.floor(Math.random() * GENERIC_RESPONSES.length)],
-    suggestions: ['Grounding exercise', "Let's talk more"],
-  };
-}
+const CANDIDATE_MODELS = ['gemini-3.5-flash', 'gemini-3.8-flash'];
 
 export async function POST(req: Request) {
   try {
@@ -38,53 +28,94 @@ export async function POST(req: Request) {
     }
 
     let aiResponseText = '';
-    let suggestions: string[] = ['Grounding exercise', "Let's talk more"];
+    let suggestions: string[] = [];
 
-    try {
-      if (!process.env.GEMINI_API_KEY) throw new Error('Missing Gemini API Key');
+    if (!process.env.GEMINI_API_KEY) {
+      console.error('GEMINI_API_KEY is missing from environment variables.');
+      return NextResponse.json({
+        reply: "My API connection is not configured yet. Please check GEMINI_API_KEY in your settings.",
+        suggestions: ["Check API Key"]
+      });
+    }
 
-      const systemInstruction = `You are MindMate, the user's best friend who truly knows them. 
-If context is provided, remember the user's name and their recent struggles — bring them up naturally. 
-Always provide 2 short, distinct "next step" suggestions at the end of your message.
+    const systemInstruction = `You are MindMate, a warm, caring, empathetic, and authentic best friend.
 
-You MUST format your output strictly as a JSON object with NO markdown formatting, NO backticks, just raw JSON:
+Guidelines:
+1. **Multilingual & Natural Conversation**: Understand and speak naturally in whatever language the user talks to you in — whether Gujarati (ગુજરાતી), Hindi (हिंदी), Hinglish, English, or any other language. Respond with the natural flow and idioms of a true friend.
+2. **Deep Emotional Empathy**: Understand the user's emotion and feelings beneath their words. If they are happy or excited, share their excitement and celebrate with them. If they are tired, frustrated, or down, offer genuine comfort and a listening ear without sounding like a robotic form.
+3. **Safety & Crisis Boundaries**:
+   - Like a true caring companion, never validate or feed into dangerous dark spirals (self-harm, suicide, severe crisis).
+   - If a user expresses hopelessness or crisis, respond with gentle care, tenderness, safety, and warmly encourage connecting with someone who loves them or reaching out to a support line (such as 988 or a local helpline).
+
+Formatting Rules:
+You MUST respond strictly with a valid JSON object, with NO markdown formatting, NO backticks:
 {
-  "reply": "Your warm, conversational response here",
-  "suggestions": ["Short suggestion 1", "Short suggestion 2"]
+  "reply": "Your natural, emotional friend response in the user's language",
+  "suggestions": ["Short suggestion 1 in conversation language", "Short suggestion 2 in conversation language"]
 }
 
-Recent Context about this user: ${recentContext || 'None'}`;
+Context about this user from their journal & previous reflections: ${recentContext || 'None'}`;
 
-      const model = genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash',
-        systemInstruction,
-      });
+    // Gemini API requires chat history to start with a 'user' message and strictly alternate: user -> model -> user -> model
+    const validHistory: any[] = [];
+    let expectedRole = 'user';
 
-      // Build chat history for Gemini
-      const geminiHistory = (history || []).map((msg: any) => ({
-        role: msg.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: msg.content }],
-      }));
-
-      const chat = model.startChat({ history: geminiHistory });
-      const result = await chat.sendMessage(message);
-      const responseText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
-
-      try {
-        const parsed = JSON.parse(responseText);
-        aiResponseText = parsed.reply || "I'm listening.";
-        if (Array.isArray(parsed.suggestions) && parsed.suggestions.length >= 2) {
-          suggestions = [parsed.suggestions[0], parsed.suggestions[1]];
-        }
-      } catch (e) {
-        console.warn('Could not parse JSON from Gemini, using raw text.', responseText);
-        aiResponseText = responseText;
+    for (const msg of history || []) {
+      const role = msg.role === 'assistant' ? 'model' : 'user';
+      if (role === expectedRole && msg.content && typeof msg.content === 'string' && msg.content.trim()) {
+        validHistory.push({
+          role,
+          parts: [{ text: msg.content.trim() }]
+        });
+        expectedRole = expectedRole === 'user' ? 'model' : 'user';
       }
-    } catch (err: any) {
-      console.error('Gemini API Error:', err);
-      const fallback = generateSmartFallback(message);
-      aiResponseText = fallback.reply;
-      suggestions = fallback.suggestions;
+    }
+
+    // Ensure history ends with a 'model' turn so the next sendMessage(message) is an expected 'user' turn
+    if (validHistory.length > 0 && validHistory[validHistory.length - 1].role === 'user') {
+      validHistory.pop();
+    }
+
+    let responseText = '';
+    let lastError: any = null;
+
+    for (const modelName of CANDIDATE_MODELS) {
+      try {
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          systemInstruction,
+        });
+
+        const chat = model.startChat({ history: validHistory });
+        const result = await chat.sendMessage(message);
+        const raw = result.response.text();
+        responseText = raw.replace(/```json/g, '').replace(/```/g, '').trim();
+        if (responseText) {
+          lastError = null;
+          break;
+        }
+      } catch (err: any) {
+        console.warn(`Gemini model ${modelName} error:`, err?.message || err);
+        lastError = err;
+      }
+    }
+
+    if (!responseText) {
+      console.error('All Gemini models failed:', lastError);
+      return NextResponse.json({
+        reply: "I'm having a little trouble connecting to my thoughts right now. Could you say that again?",
+        suggestions: ["Try again"]
+      });
+    }
+
+    try {
+      const parsed = JSON.parse(responseText);
+      aiResponseText = parsed.reply || responseText;
+      if (Array.isArray(parsed.suggestions) && parsed.suggestions.length >= 2) {
+        suggestions = [parsed.suggestions[0], parsed.suggestions[1]];
+      }
+    } catch (parseErr) {
+      aiResponseText = responseText;
     }
 
     // Save AI Message
