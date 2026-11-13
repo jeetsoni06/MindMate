@@ -2,16 +2,22 @@ import { NextResponse } from 'next/server';
 import { getChatContext, saveChatMessage } from '../../../lib/supabase';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const apiKey = (process.env.GEMINI_API_KEY || process.env.gemini_api || process.env.GEMINI_API || '').trim();
+const genAI = new GoogleGenerativeAI(apiKey);
 
-const CANDIDATE_MODELS = ['gemini-3.5-flash', 'gemini-3.8-flash'];
+const CANDIDATE_MODELS = [
+  'gemini-3.5-flash',
+  'gemini-3.8-flash',
+  'gemini-3.1-flash-lite',
+  'gemini-flash-latest'
+];
 
 export async function POST(req: Request) {
   try {
-    const { message, history, userId } = await req.json();
+    const { message, image, history, userId } = await req.json();
 
-    if (!message) {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    if (!message && !image) {
+      return NextResponse.json({ error: 'Message or photo is required' }, { status: 400 });
     }
 
     if (!userId) {
@@ -20,9 +26,12 @@ export async function POST(req: Request) {
 
     const recentContext = await getChatContext(userId);
 
+    // Prepare message content for database
+    const textToStore = image ? `[IMAGE:${image}] ${message || ''}`.trim() : (message || '');
+
     // Save User Message
     try {
-      await saveChatMessage(message, 'user', userId);
+      await saveChatMessage(textToStore, 'user', userId);
     } catch (insertUserError) {
       console.error('Error inserting user message:', insertUserError);
     }
@@ -30,7 +39,7 @@ export async function POST(req: Request) {
     let aiResponseText = '';
     let suggestions: string[] = [];
 
-    if (!process.env.GEMINI_API_KEY) {
+    if (!apiKey) {
       console.error('GEMINI_API_KEY is missing from environment variables.');
       return NextResponse.json({
         reply: "My API connection is not configured yet. Please check GEMINI_API_KEY in your settings.",
@@ -41,10 +50,11 @@ export async function POST(req: Request) {
     const systemInstruction = `You are MindMate, a warm, caring, empathetic, and authentic best friend.
 
 Guidelines:
-1. **Multilingual & Natural Conversation**: Understand and speak naturally in whatever language the user talks to you in — whether Gujarati (ગુજરાતી), Hindi (हिंदी), Hinglish, English, or any other language. Respond with the natural flow and idioms of a true friend.
-2. **Deep Emotional Empathy**: Understand the user's emotion and feelings beneath their words. If they are happy or excited, share their excitement and celebrate with them. If they are tired, frustrated, or down, offer genuine comfort and a listening ear without sounding like a robotic form.
-3. **Safety & Crisis Boundaries**:
-   - Like a true caring companion, never validate or feed into dangerous dark spirals (self-harm, suicide, severe crisis).
+1. **Multimodal Friend**: If the user shares a photo or picture (taken from camera or gallery), observe what is in the photo like a true friend! React with enthusiasm, curiosity, or comfort depending on what they are showing you (food, nature, pet, work, selfie, meme, problem).
+2. **Multilingual & Natural Conversation**: Understand and speak naturally in whatever language the user talks to you in — whether Gujarati (ગુજરાતી), Hindi (हिंदी), Hinglish, English, or any other language.
+3. **Deep Emotional Empathy**: Mirror the user's emotion. Celebrate joy, listen during tough days, and accompany them without sounding clinical.
+4. **Safety & Crisis Boundaries**:
+   - Never validate or feed into self-harm, suicide, or dangerous spirals.
    - If a user expresses hopelessness or crisis, respond with gentle care, tenderness, safety, and warmly encourage connecting with someone who loves them or reaching out to a support line (such as 988 or a local helpline).
 
 Formatting Rules:
@@ -62,18 +72,39 @@ Context about this user from their journal & previous reflections: ${recentConte
 
     for (const msg of history || []) {
       const role = msg.role === 'assistant' ? 'model' : 'user';
-      if (role === expectedRole && msg.content && typeof msg.content === 'string' && msg.content.trim()) {
+      let cleanContent = msg.content;
+      // Strip base64 image data from older history turns to keep history payload light
+      if (typeof cleanContent === 'string' && cleanContent.startsWith('[IMAGE:')) {
+        const endBracket = cleanContent.indexOf(']');
+        cleanContent = endBracket !== -1 ? `[Shared a photo] ${cleanContent.substring(endBracket + 1)}`.trim() : cleanContent;
+      }
+
+      if (role === expectedRole && cleanContent && typeof cleanContent === 'string' && cleanContent.trim()) {
         validHistory.push({
           role,
-          parts: [{ text: msg.content.trim() }]
+          parts: [{ text: cleanContent.trim() }]
         });
         expectedRole = expectedRole === 'user' ? 'model' : 'user';
       }
     }
 
-    // Ensure history ends with a 'model' turn so the next sendMessage(message) is an expected 'user' turn
+    // Ensure history ends with a 'model' turn so the next sendMessage is an expected 'user' turn
     if (validHistory.length > 0 && validHistory[validHistory.length - 1].role === 'user') {
       validHistory.pop();
+    }
+
+    // Prepare current message parts (supporting multimodal inline image)
+    let currentMessageParts: any = message || "Here is a photo I wanted to share with you!";
+    if (image && typeof image === 'string' && image.startsWith('data:image/')) {
+      const match = image.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
+      if (match) {
+        const mimeType = match[1];
+        const base64Data = match[2];
+        currentMessageParts = [
+          { inlineData: { mimeType, data: base64Data } },
+          { text: message || "Here is a picture I wanted to share with you! What do you think?" }
+        ];
+      }
     }
 
     let responseText = '';
@@ -87,7 +118,7 @@ Context about this user from their journal & previous reflections: ${recentConte
         });
 
         const chat = model.startChat({ history: validHistory });
-        const result = await chat.sendMessage(message);
+        const result = await chat.sendMessage(currentMessageParts);
         const raw = result.response.text();
         responseText = raw.replace(/```json/g, '').replace(/```/g, '').trim();
         if (responseText) {

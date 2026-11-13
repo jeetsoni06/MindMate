@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { getChatContext, getChatHistory } from '../../../../lib/supabase';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const apiKey = (process.env.GEMINI_API_KEY || process.env.gemini_api || process.env.GEMINI_API || '').trim();
+const genAI = new GoogleGenerativeAI(apiKey);
 const CANDIDATE_MODELS = ['gemini-3.5-flash', 'gemini-3.8-flash'];
 
 const FALLBACK_RECS = [
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
     const chatHistoryRaw = await getChatHistory(userId);
     const chatHistoryStr = chatHistoryRaw.map((msg) => `${msg.role}: ${msg.content}`).join('\n');
 
-    if (!process.env.GEMINI_API_KEY) {
+    if (!apiKey) {
       return NextResponse.json({ recommendations: FALLBACK_RECS });
     }
 
