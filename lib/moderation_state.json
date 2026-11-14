@@ -1,0 +1,25 @@
+{
+  "approvedIds": [],
+  "deletedIds": [
+    "3cc19b62-ec6a-4ddc-9501-fd18eb8996db",
+    "e05ab1c7-95c9-4d54-a9a6-ba789adce892",
+    "02d1572a-ad12-4064-9d0e-48745144a245",
+    "48b733b7-17b6-41da-a337-cebaff415835",
+    "9e64a3be-dbcf-492b-bebb-4f21c34bab1d",
+    "87736e27-530d-472e-a504-33867f66feeb",
+    "35c60ac0-ee15-4e7a-8f65-db6897649db7",
+    "110c7f1d-3516-48b1-84a6-1c88ffefcfad",
+    "681e7104-0151-43b1-aa76-50e56cf368d4",
+    "7fd9fc7f-ebe8-4a3c-8d50-4f17206dd738",
+    "45ef7e92-dc9b-4d08-a122-e458c1aabce8",
+    "75f86472-9a78-445f-9b34-c66d2335d8eb"
+  ],
+  "edits": {},
+  "blockedUsers": [],
+  "deletedUsers": [],
+  "userTimeSpent": {},
+  "userLastActiveAt": {
+    "eba0b8c1-b080-416b-8667-071e5bed6cad": 1794667508357
+  },
+  "userDailyTime": {}
+}

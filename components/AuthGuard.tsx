@@ -13,9 +13,35 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     if (!token) {
       setAuthorized(false);
       router.replace("/auth");
-    } else {
-      setAuthorized(true);
+      return;
     }
+
+    setAuthorized(true);
+
+    // Initial heartbeat & periodic activity timer (every 30s)
+    const sendHeartbeat = async () => {
+      try {
+        const res = await fetch('/api/user/heartbeat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: token })
+        });
+        const data = await res.json();
+        if (data.blocked) {
+          sessionStorage.clear();
+          localStorage.removeItem("soul_link_id");
+          localStorage.removeItem("soul_link_username");
+          router.replace("/auth?blocked=1");
+        }
+      } catch (err) {
+        // network resilience
+      }
+    };
+
+    sendHeartbeat();
+    const interval = setInterval(sendHeartbeat, 30000);
+
+    return () => clearInterval(interval);
   }, [router]);
 
   if (!authorized) {

@@ -17,6 +17,9 @@ export default function AuthPage() {
 
   // Auto-fill username if remembered on this device so returning user only enters PIN
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('blocked=1')) {
+      setErrorStatus("This account has been suspended by an administrator.");
+    }
     const rememberedUser = localStorage.getItem("soul_link_username");
     if (rememberedUser) {
       setUsername(rememberedUser);
@@ -61,6 +64,23 @@ export default function AuthPage() {
       } else {
         const res = await verifyVault(cleanUser, cleanPin);
         if (res.success && res.user) {
+          // Check if blocked by admin
+          try {
+            const hb = await fetch('/api/user/heartbeat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId: res.user.id })
+            });
+            const hbData = await hb.json();
+            if (hbData.blocked) {
+              setErrorStatus("This account has been suspended by an administrator.");
+              setLoading(false);
+              return;
+            }
+          } catch (e) {
+            // continue if network check fails
+          }
+
           sessionStorage.setItem("soul_link_id", res.user.id);
           sessionStorage.setItem("soul_link_username", res.user.username);
           localStorage.setItem("soul_link_username", res.user.username);
