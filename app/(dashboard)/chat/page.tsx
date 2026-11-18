@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getChatMessages } from "@/lib/supabase";
-import { Sparkles, Send, LogOut, Mic, MicOff, Volume2, VolumeX, Camera, Image as ImageIcon, X, RefreshCw } from "lucide-react";
+import { Sparkles, Send, LogOut, Mic, MicOff, Volume2, VolumeX, Camera, Image as ImageIcon, X, RefreshCw, Lock, Check, BookOpen } from "lucide-react";
 
 interface Message {
   role: string;
@@ -21,6 +21,34 @@ export default function ChatPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [playingMessageIndex, setPlayingMessageIndex] = useState<number | null>(null);
+
+  // 7-Day Journaling Lock State
+  const [chatStatus, setChatStatus] = useState<{
+    loading: boolean;
+    unlocked: boolean;
+    completedCount: number;
+    totalDays: number;
+    rollingDays: Array<{
+      dateKey: string;
+      dayLetter: string;
+      shortName: string;
+      isToday: boolean;
+      isActive: boolean;
+    }>;
+    hasSeenCelebration: boolean;
+    startDateStr: string;
+    endDateStr: string;
+  }>({
+    loading: true,
+    unlocked: true,
+    completedCount: 0,
+    totalDays: 7,
+    rollingDays: [],
+    hasSeenCelebration: true,
+    startDateStr: '',
+    endDateStr: ''
+  });
+  const [showCelebrationBanner, setShowCelebrationBanner] = useState(false);
 
   // Live Camera states
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -42,21 +70,54 @@ export default function ChatPage() {
     const user = sessionStorage.getItem("soul_link_username") || localStorage.getItem("soul_link_username") || "";
     setUsername(user);
 
-    async function fetchHistory() {
+    async function checkStatusAndHistory() {
       const token = getActiveToken();
-      if (!token) return;
-      const history = await getChatMessages(token);
-      if (history && history.length > 0) {
-        setMessages(history.map((msg: any) => ({ role: msg.role, content: msg.content })));
-      } else {
-        setMessages([{
-          role: 'assistant',
-          content: 'Hi! I am MindMate. How are you feeling today? I am here to listen.',
-          suggestions: [] 
-        }]);
+      if (!token) {
+        setChatStatus(prev => ({ ...prev, loading: false }));
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/user/chat-status?userId=${encodeURIComponent(token)}`);
+        if (res.ok) {
+          const statusData = await res.json();
+          setChatStatus({
+            loading: false,
+            unlocked: statusData.unlocked,
+            completedCount: statusData.completedCount || 0,
+            totalDays: statusData.totalDays || 7,
+            rollingDays: statusData.rollingDays || [],
+            hasSeenCelebration: statusData.hasSeenCelebration,
+            startDateStr: statusData.startDateStr || '',
+            endDateStr: statusData.endDateStr || ''
+          });
+
+          const localSeen = localStorage.getItem(`chat_celebration_seen_${token}`);
+          if (statusData.unlocked && !statusData.hasSeenCelebration && !localSeen) {
+            setShowCelebrationBanner(true);
+          }
+
+          if (statusData.unlocked) {
+            const history = await getChatMessages(token);
+            if (history && history.length > 0) {
+              setMessages(history.map((msg: any) => ({ role: msg.role, content: msg.content })));
+            } else {
+              setMessages([{
+                role: 'assistant',
+                content: 'Hi! I am MindMate. How are you feeling today? I am here to listen.',
+                suggestions: [] 
+              }]);
+            }
+          }
+        } else {
+          setChatStatus(prev => ({ ...prev, loading: false }));
+        }
+      } catch (err) {
+        console.error("Error checking chat unlock status:", err);
+        setChatStatus(prev => ({ ...prev, loading: false }));
       }
     }
-    fetchHistory();
+    checkStatusAndHistory();
 
     return () => {
       if (recognitionRef.current) {
@@ -250,7 +311,26 @@ export default function ChatPage() {
     window.speechSynthesis.speak(utterance);
   };
 
+  const handleDismissCelebration = async () => {
+    setShowCelebrationBanner(false);
+    const token = getActiveToken();
+    if (!token) return;
+    localStorage.setItem(`chat_celebration_seen_${token}`, 'true');
+    try {
+      await fetch('/api/user/chat-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: token, action: 'acknowledge_celebration' })
+      });
+    } catch (e) {
+      // ignore network errors
+    }
+  };
+
   const handleSend = async (forcedUserMessage?: string) => {
+    if (showCelebrationBanner) {
+      handleDismissCelebration();
+    }
     if (isRecording) {
       recognitionRef.current?.stop();
       setIsRecording(false);
@@ -359,9 +439,111 @@ export default function ChatPage() {
         </div>
       </header>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 pb-36 max-w-2xl mx-auto w-full">
-        <div className="text-center">
+      {chatStatus.loading ? (
+        <div className="flex-1 flex flex-col items-center justify-center py-20">
+          <div className="w-8 h-8 rounded-full border-4 border-[#b42243] border-t-transparent animate-spin mb-3"></div>
+          <p className="text-xs font-semibold text-gray-500">Connecting to Sanctuary...</p>
+        </div>
+      ) : !chatStatus.unlocked ? (
+        <div className="flex-1 overflow-y-auto px-6 py-8 max-w-xl mx-auto w-full flex flex-col items-center justify-center text-center">
+          <div className="w-full bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-pink-500/5 flex flex-col items-center">
+            <div className="w-16 h-16 rounded-3xl bg-pink-50 border border-pink-100 flex items-center justify-center text-[#b42243] mb-5 shadow-sm">
+              <Lock size={28} />
+            </div>
+
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#b42243] bg-pink-50 px-3.5 py-1 rounded-full mb-3 border border-pink-100">
+              Feature Locked
+            </span>
+
+            <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-2">
+              AI Friend is Locked
+            </h2>
+
+            <p className="text-xs md:text-sm text-gray-600 max-w-md mx-auto leading-relaxed mb-6 font-medium">
+              Complete your full 7-day journaling journey to unlock your personal AI companion. Daily reflections build a healthy habit and help MindMate understand your thoughts and emotions.
+            </p>
+
+            {/* Rolling 7-Day Cycle Progress Tracker */}
+            <div className="w-full bg-[#FDF8F9] rounded-2xl p-5 border border-pink-100 mb-6">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-[11px] font-bold text-gray-700 uppercase tracking-wider">
+                  Rolling 7-Day Journey ({chatStatus.startDateStr} – {chatStatus.endDateStr})
+                </span>
+                <span className="text-xs font-extrabold text-[#b42243] bg-white px-2.5 py-0.5 rounded-full border border-pink-100 shadow-xs">
+                  {chatStatus.completedCount} / 7 Days
+                </span>
+              </div>
+
+              {/* 7-Day Visual Circles */}
+              <div className="flex justify-between items-center gap-1.5 my-3">
+                {chatStatus.rollingDays.map((day, idx) => (
+                  <div key={idx} className="flex flex-col items-center gap-1 flex-1">
+                    <div
+                      className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                        day.isActive
+                          ? 'bg-[#b42243] text-white shadow-sm ring-2 ring-[#b42243]/20'
+                          : day.isToday
+                          ? 'border-2 border-[#b42243] text-[#b42243] bg-white ring-2 ring-pink-100'
+                          : 'border border-dashed border-gray-300 text-gray-400 bg-white'
+                      }`}
+                    >
+                      {day.isActive ? <Check size={14} strokeWidth={3} /> : day.dayLetter}
+                    </div>
+                    <span className={`text-[9px] font-semibold ${day.isToday ? 'text-[#b42243] font-bold' : 'text-gray-500'}`}>
+                      {day.isToday ? 'Today' : day.shortName}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Status Note */}
+              <p className="text-[11px] text-gray-500 mt-2 font-medium">
+                {7 - chatStatus.completedCount > 0
+                  ? `${7 - chatStatus.completedCount} more active journal day${7 - chatStatus.completedCount === 1 ? '' : 's'} needed to complete this cycle.`
+                  : '7 days completed! Unlocking now...'}
+              </p>
+            </div>
+
+            {/* CTA Button to Journal */}
+            <button
+              onClick={() => router.push('/journal')}
+              className="w-full py-3.5 bg-[#b42243] hover:bg-[#9a1a36] text-white rounded-full font-bold text-sm shadow-lg shadow-[#b42243]/20 hover:shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+            >
+              <BookOpen size={16} />
+              Write Today&apos;s Reflection
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 pb-36 max-w-2xl mx-auto w-full">
+            {/* 7-Day Unlock Celebration Announcement Banner */}
+            {showCelebrationBanner && (
+              <div className="w-full bg-white rounded-2xl p-4 border border-[#b42243]/30 shadow-md mb-4 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-pink-50 text-[#b42243] flex items-center justify-center shrink-0 border border-pink-100">
+                    <Sparkles size={18} />
+                  </div>
+                  <div className="text-left">
+                    <h4 className="text-sm font-bold text-gray-900">
+                      Talk to your friend who has unlocked a new feature
+                    </h4>
+                    <p className="text-xs text-gray-500 font-medium">
+                      Your 7-day reflection journey is complete. MindMate now knows your story and is ready to talk.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleDismissCelebration}
+                  className="text-xs font-bold text-[#b42243] bg-pink-50 hover:bg-pink-100 px-3 py-1.5 rounded-full transition-all shrink-0 cursor-pointer"
+                >
+                  Start Chat
+                </button>
+              </div>
+            )}
+
+            <div className="text-center">
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-100 px-3 py-1 rounded-full">
             {getDayTime()}
           </span>
@@ -616,6 +798,8 @@ export default function ChatPage() {
           </button>
         </form>
       </div>
+      </>
+      )}
     </div>
   );
 }

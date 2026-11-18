@@ -161,8 +161,7 @@ export default function TasksPage() {
       {/* Daily Focus */}
       <div className="flex justify-between items-end mb-4 mt-2">
         <div>
-          <p className="text-[10px] font-extrabold tracking-[0.2em] text-gray-400 uppercase mb-1">Current Focus</p>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight leading-none">Daily Focus</h1>
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight leading-none">TASKS</h1>
         </div>
         <div className="text-right flex flex-col items-end">
           <span className="text-3xl font-bold text-[#FE005B] leading-none mb-1">{completionPercentage}%</span>
@@ -179,7 +178,7 @@ export default function TasksPage() {
 
       {/* Today's Rituals */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-bold text-gray-900">Today's Rituals</h2>
+        <h2 className="text-lg font-bold text-gray-900">To do list</h2>
         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
           Personal
         </span>
@@ -214,7 +213,7 @@ export default function TasksPage() {
         ))}
         {tasks.length === 0 && (
            <div className="p-6 text-center border-2 border-dashed border-gray-200 rounded-2xl bg-white/50">
-             <p className="text-gray-500 font-medium text-sm">No rituals setup yet.<br/>Add a recommendation below!</p>
+             <p className="text-gray-500 font-medium text-sm">No task added add your tasks</p>
            </div>
         )}
       </div>
@@ -240,11 +239,7 @@ export default function TasksPage() {
 
       {/* AI Recommended */}
       <div className="mb-4">
-        <div className="flex items-center gap-1.5 uppercase tracking-widest text-[#FE005B] font-bold text-[10px] mb-2">
-           <Sparkles size={12} /> Personalized
-        </div>
         <h2 className="text-xl font-bold text-gray-900 mb-1">AI Recommended for You</h2>
-        <p className="text-xs text-gray-500 font-medium">Based on your mood check-in: <span className="text-[#FE005B] italic">"{latestMood}"</span></p>
       </div>
 
       <div className="space-y-4 pb-10">

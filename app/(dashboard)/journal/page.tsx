@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getJournals, supabase } from "@/lib/supabase";
+import { calculateRollingStreak } from "@/lib/journalStreak";
 import JournalCard from "@/components/JournalCard";
 import JournalInput from "@/components/JournalInput";
 import { Plus, Bell, Sparkles, LogOut, Edit3 } from "lucide-react";
@@ -127,38 +128,7 @@ export default function JournalPage() {
     return { tag: "Worst", color: "text-[#b42243] bg-red-50 border-red-200" };
   };
 
-  const getDaysOfWeek = () => {
-    const now = new Date();
-    const dayOfWeek = now.getDay(); // 0 is Sunday, 1 is Monday ... 6 is Saturday
-    const mondayOffset = (dayOfWeek + 6) % 7; // Monday = 0, Tuesday = 1 ... Sunday = 6
-
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - mondayOffset);
-    startOfWeek.setHours(0, 0, 0, 0);
-
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 7);
-
-    const active = [false, false, false, false, false, false, false];
-
-    journals.forEach(j => {
-      if (!j.created_at) return;
-      const d = new Date(j.created_at);
-      if (d >= startOfWeek && d < endOfWeek) {
-        const jsDay = d.getDay();
-        const idx = (jsDay + 6) % 7; // 0 for Monday, 6 for Sunday
-        active[idx] = true;
-      }
-    });
-
-    return {
-      activeDays: active,
-      currentDayIndex: mondayOffset
-    };
-  };
-
-  const weekInfo = getDaysOfWeek();
-  const daysLetters = ['M','T','W','T','F','S','S'];
+  const rollingStreak = calculateRollingStreak(journals);
 
   return (
     <main className="px-6 md:px-12 max-w-2xl mx-auto flex flex-col pt-4 pb-12">
@@ -183,7 +153,6 @@ export default function JournalPage() {
 
       {/* Hero Editorial Section */}
       <section className="mb-6 mt-4">
-        <span className="text-[10px] font-extrabold tracking-[0.2em] text-[#78555e] uppercase mb-2 block">Daily Reflections</span>
         <div>
           {isEditingTitle ? (
             <input
@@ -222,27 +191,39 @@ export default function JournalPage() {
         </div>
       </div>
 
-      {/* Days Array */}
-      <div className="flex justify-between items-center mb-8 px-4 py-3 bg-white/70 rounded-2xl border border-gray-100 shadow-sm">
-        {daysLetters.map((letter, idx) => {
-          const isActive = weekInfo.activeDays[idx];
-          const isToday = idx === weekInfo.currentDayIndex;
-
-          return (
-            <span
-              key={idx}
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                isActive
-                  ? 'bg-[#b42243] text-white shadow-sm'
-                  : isToday
-                  ? 'border-2 border-[#b42243] text-[#b42243] bg-pink-50/50'
-                  : 'text-gray-400'
-              }`}
-            >
-              {letter}
-            </span>
-          );
-        })}
+      {/* Rolling 7-Day Journey Strip */}
+      <div className="mb-8 p-4 bg-white/80 rounded-2xl border border-gray-100 shadow-sm">
+        <div className="flex justify-between items-center mb-3 px-1">
+          <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+            Rolling 7-Day Cycle ({rollingStreak.startDateStr} – {rollingStreak.endDateStr})
+          </span>
+          <span className="text-xs font-extrabold text-[#b42243] bg-pink-50 px-2.5 py-0.5 rounded-full border border-pink-100">
+            {rollingStreak.completedCount} / 7 Days
+          </span>
+        </div>
+        <div className="flex justify-between items-center px-1">
+          {rollingStreak.rollingDays.map((day, idx) => {
+            return (
+              <div key={idx} className="flex flex-col items-center gap-1">
+                <span
+                  title={`${day.shortName} (${day.dateKey})`}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                    day.isActive
+                      ? 'bg-[#b42243] text-white shadow-sm ring-2 ring-[#b42243]/20'
+                      : day.isToday
+                      ? 'border-2 border-[#b42243] text-[#b42243] bg-pink-50/50'
+                      : 'text-gray-400 bg-gray-50 border border-gray-100'
+                  }`}
+                >
+                  {day.dayLetter}
+                </span>
+                <span className={`text-[9px] font-semibold ${day.isToday ? 'text-[#b42243] font-bold' : 'text-gray-400'}`}>
+                  {day.isToday ? 'Today' : day.shortName}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <div className="w-full h-px bg-gray-200/60 mt-4 mb-8"></div>
@@ -268,7 +249,7 @@ export default function JournalPage() {
               onClick={() => setIsModalOpen(true)}
               className="bg-[#b42243] text-white px-6 py-2.5 rounded-full font-bold shadow-md hover:bg-[#9a1a36] transition-all text-sm"
             >
-              Write First Reflection
+              Write First Page
             </button>
           </div>
         ) : (

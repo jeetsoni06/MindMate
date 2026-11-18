@@ -12,14 +12,45 @@
     "681e7104-0151-43b1-aa76-50e56cf368d4",
     "7fd9fc7f-ebe8-4a3c-8d50-4f17206dd738",
     "45ef7e92-dc9b-4d08-a122-e458c1aabce8",
-    "75f86472-9a78-445f-9b34-c66d2335d8eb"
+    "75f86472-9a78-445f-9b34-c66d2335d8eb",
+    "58d07baa-58d3-4546-bfce-9a0c31014200",
+    "0ad69665-b0ac-46a6-a8c6-a48fdd2b8ad8",
+    "9a244c7b-5dcb-42b1-9a16-ff4463d89fed",
+    "4c632b02-8709-4d33-94fa-f558c6cbb939",
+    "e2c8bbd5-8bbc-444d-9382-6e454591f1d3"
   ],
   "edits": {},
   "blockedUsers": [],
-  "deletedUsers": [],
-  "userTimeSpent": {},
-  "userLastActiveAt": {
-    "eba0b8c1-b080-416b-8667-071e5bed6cad": 1794667508357
+  "deletedUsers": [
+    "eba0b8c1-b080-416b-8667-071e5bed6cad",
+    "7182d9fe-def7-48aa-bf40-cbe4ce5f07a4",
+    "aa8a8be6-d998-4e23-b36f-b98ed986f84a",
+    "41cc95a1-49d4-42f6-9e81-f5c6259c4fd3",
+    "0c6e96aa-4ad6-4989-9717-1f7b4c71e065"
+  ],
+  "userTimeSpent": {
+    "31a633af-9e11-4dc7-a461-d667c37bfc09": 240,
+    "92c97fc8-ff36-4fb0-9fd1-f6af0d6c392a": 12750
   },
-  "userDailyTime": {}
+  "userLastActiveAt": {
+    "31a633af-9e11-4dc7-a461-d667c37bfc09": 1794734952921,
+    "92c97fc8-ff36-4fb0-9fd1-f6af0d6c392a": 1794988950024
+  },
+  "userDailyTime": {
+    "31a633af-9e11-4dc7-a461-d667c37bfc09": {
+      "2026-11-15": 240
+    },
+    "92c97fc8-ff36-4fb0-9fd1-f6af0d6c392a": {
+      "2026-11-15": 6750,
+      "2026-11-16": 2460,
+      "2026-11-17": 1800,
+      "2026-11-18": 1740
+    }
+  },
+  "userPinOverrides": {
+    "eba0b8c1-b080-416b-8667-071e5bed6cad": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+    "jeet0": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+  },
+  "unlockedChatUsers": [],
+  "celebratedChatUsers": []
 }

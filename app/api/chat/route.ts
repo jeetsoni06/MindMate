@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { getChatContext, saveChatMessage } from '../../../lib/supabase';
+import { getChatContext, saveChatMessage, supabase } from '../../../lib/supabase';
+import { moderationState, savePersistedState } from '../../../lib/adminStore';
+import { calculateRollingStreak } from '../../../lib/journalStreak';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const apiKey = (process.env.GEMINI_API_KEY || process.env.gemini_api || process.env.GEMINI_API || '').trim();
@@ -22,6 +24,39 @@ export async function POST(req: Request) {
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized: Active Vault session required' }, { status: 401 });
+    }
+
+    // Check if user has unlocked the AI Friend feature (7-day journaling rule)
+    let isUnlocked = moderationState.unlockedChatUsers.has(userId);
+    if (!isUnlocked) {
+      const { data: userJournals } = await supabase
+        .from('journals')
+        .select('created_at')
+        .eq('user_id', userId);
+      const streak = calculateRollingStreak(userJournals || []);
+      if (streak.isFullWeekCompleted) {
+        isUnlocked = true;
+        moderationState.unlockedChatUsers.add(userId);
+        savePersistedState();
+      } else {
+        const { data: existingChat } = await supabase
+          .from('chat_messages')
+          .select('id')
+          .eq('user_id', userId)
+          .limit(1);
+        if (existingChat && existingChat.length > 0) {
+          isUnlocked = true;
+          moderationState.unlockedChatUsers.add(userId);
+          savePersistedState();
+        }
+      }
+    }
+
+    if (!isUnlocked) {
+      return NextResponse.json({
+        reply: "Your AI Friend is locked until you complete 7 days of journaling. Complete your 7-day reflection streak to unlock your companion.",
+        locked: true
+      }, { status: 403 });
     }
 
     const recentContext = await getChatContext(userId);

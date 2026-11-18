@@ -28,6 +28,9 @@ interface ModerationState {
   userTimeSpent: Map<string, number>; // seconds (lifetime starting from 8:30 PM today)
   userLastActiveAt: Map<string, number>; // epoch ms timestamp of latest heartbeat
   userDailyTime: Map<string, Record<string, number>>; // userId -> { '2026-11-14': seconds }
+  userPinOverrides: Map<string, string>; // userId -> newHashedPin
+  unlockedChatUsers: Set<string>; // users who completed 7 days or are grandfathered in
+  celebratedChatUsers: Set<string>; // users who have seen/acknowledged the unlock announcement
 }
 
 // Dummy/test IDs to permanently exclude
@@ -54,7 +57,10 @@ function loadPersistedState(): ModerationState {
     deletedUsers: new Set<string>(),
     userTimeSpent: new Map<string, number>(), // reset to 0
     userLastActiveAt: new Map<string, number>(),
-    userDailyTime: new Map<string, Record<string, number>>()
+    userDailyTime: new Map<string, Record<string, number>>(),
+    userPinOverrides: new Map<string, string>(),
+    unlockedChatUsers: new Set<string>(),
+    celebratedChatUsers: new Set<string>()
   };
 
   try {
@@ -93,6 +99,17 @@ function loadPersistedState(): ModerationState {
           state.userDailyTime.set(id, daily as Record<string, number>);
         });
       }
+      if (parsed.userPinOverrides && typeof parsed.userPinOverrides === 'object') {
+        Object.entries(parsed.userPinOverrides).forEach(([id, pin]) => {
+          state.userPinOverrides.set(id, String(pin));
+        });
+      }
+      if (Array.isArray(parsed.unlockedChatUsers)) {
+        parsed.unlockedChatUsers.forEach((id: string) => state.unlockedChatUsers.add(id));
+      }
+      if (Array.isArray(parsed.celebratedChatUsers)) {
+        parsed.celebratedChatUsers.forEach((id: string) => state.celebratedChatUsers.add(id));
+      }
     }
   } catch (err) {
     console.warn("Notice: could not load moderation_state.json:", err);
@@ -114,7 +131,10 @@ export function savePersistedState() {
       deletedUsers: Array.from(moderationState.deletedUsers),
       userTimeSpent: Object.fromEntries(moderationState.userTimeSpent.entries()),
       userLastActiveAt: Object.fromEntries(moderationState.userLastActiveAt.entries()),
-      userDailyTime: Object.fromEntries(moderationState.userDailyTime.entries())
+      userDailyTime: Object.fromEntries(moderationState.userDailyTime.entries()),
+      userPinOverrides: Object.fromEntries(moderationState.userPinOverrides.entries()),
+      unlockedChatUsers: Array.from(moderationState.unlockedChatUsers || []),
+      celebratedChatUsers: Array.from(moderationState.celebratedChatUsers || [])
     };
     fs.writeFileSync(DATA_FILE, JSON.stringify(payload, null, 2), 'utf-8');
   } catch (err) {
@@ -140,9 +160,12 @@ if (!moderationState.blockedUsers) moderationState.blockedUsers = new Set<string
 if (!moderationState.userTimeSpent) moderationState.userTimeSpent = new Map<string, number>();
 if (!moderationState.userLastActiveAt) moderationState.userLastActiveAt = new Map<string, number>();
 if (!moderationState.userDailyTime) moderationState.userDailyTime = new Map<string, Record<string, number>>();
+if (!moderationState.userPinOverrides) moderationState.userPinOverrides = new Map<string, string>();
 if (!moderationState.approvedIds) moderationState.approvedIds = new Set<string>();
 if (!moderationState.deletedIds) moderationState.deletedIds = new Set<string>(DUMMY_TEST_IDS);
 if (!moderationState.edits) moderationState.edits = new Map<string, StoryEdit>();
+if (!moderationState.unlockedChatUsers) moderationState.unlockedChatUsers = new Set<string>();
+if (!moderationState.celebratedChatUsers) moderationState.celebratedChatUsers = new Set<string>();
 
 if (!globalForAdmin._mindmateModerationState) {
   globalForAdmin._mindmateModerationState = moderationState;

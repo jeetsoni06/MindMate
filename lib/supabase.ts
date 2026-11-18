@@ -203,7 +203,7 @@ export async function sendMessage(message: string, userId?: string) {
 }
 
 /**
- * Fetches latest 3 journal entries for AI Friend context.
+ * Fetches latest 7 journal entries for AI Friend context (full 7-day reflection history).
  */
 export async function getChatContext(userId?: string) {
   const activeUserId = getVaultId(userId);
@@ -211,17 +211,17 @@ export async function getChatContext(userId?: string) {
 
   const { data, error } = await supabase
     .from('journals')
-    .select('content_text')
+    .select('content_text, created_at')
     .eq('user_id', activeUserId)
     .order('created_at', { ascending: false })
-    .limit(3);
+    .limit(7);
 
   if (error || !data || data.length === 0) {
     return "";
   }
 
   const entriesStr = data.map((entry) => `[${entry.content_text}]`).join(', ');
-  return `Recent journals context: ${entriesStr}`;
+  return `Full week reflections context: ${entriesStr}`;
 }
 
 /**
@@ -316,19 +316,30 @@ export async function saveChatMessage(content: string, role: 'user' | 'assistant
 import { hashString } from './crypto';
 
 export async function verifyVault(username: string, pin: string) {
-  const hashedPin = await hashString(pin);
-  const { data, error } = await supabase
-    .from('auth_users')
-    .select('id, username')
-    .eq('username', username)
-    .eq('hashed_pin', hashedPin)
-    .single();
+  try {
+    const res = await fetch('/api/auth/verify-vault', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, pin })
+    });
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    // Fallback directly to Supabase if endpoint unavailable
+    const hashedPin = await hashString(pin);
+    const { data, error } = await supabase
+      .from('auth_users')
+      .select('id, username')
+      .eq('username', username)
+      .eq('hashed_pin', hashedPin)
+      .single();
 
-  if (error || !data) {
-    return { success: false, error: "Invalid Vault Name or PIN." };
+    if (error || !data) {
+      return { success: false, error: "Invalid Vault Name or PIN." };
+    }
+
+    return { success: true, user: data };
   }
-
-  return { success: true, user: data };
 }
 
 export async function createVault(username: string, pin: string, question: string, answer: string) {

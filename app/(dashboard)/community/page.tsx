@@ -18,6 +18,7 @@ interface Story {
 export default function CommunityPage() {
   const router = useRouter();
   const [stories, setStories] = useState<Story[]>([]);
+  const [expandedStories, setExpandedStories] = useState<Record<string, boolean>>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState('');
@@ -86,10 +87,10 @@ export default function CommunityPage() {
           </button>
           <div>
             <h1 className="text-[#b5173f] text-[22px] font-extrabold tracking-tight leading-none bg-clip-text">
-              Success Stories
+              Anonymous Stories
             </h1>
             <p className="text-gray-500 text-xs font-semibold mt-1">
-              Real stories. Real growth.
+              Share Your Story With Everyone
             </p>
           </div>
         </div>
@@ -108,22 +109,6 @@ export default function CommunityPage() {
 
       {/* Main Content Area */}
       <div className="space-y-6 relative">
-        
-        {/* Banner Card */}
-        <div className="bg-gradient-to-br from-[#eefaf2] to-[#f6fdf9] rounded-[32px] p-8 shadow-sm border border-[#e6f4ea] relative overflow-hidden">
-          <div className="relative z-10">
-            <h2 className="text-[#C53F54] font-bold text-xs tracking-widest uppercase mb-4 flex items-center">
-              COMMUNITY SANCTUARY
-            </h2>
-            <h3 className="text-[28px] font-extrabold text-[#111827] leading-[1.1] tracking-tight mb-4">
-              Read inspiring journeys from people who chose to <span className="text-[#FE005B]">grow</span>.
-            </h3>
-            <p className="text-[#6B7280] text-[15px] font-medium leading-relaxed max-w-[90%]">
-              Heal, and move forward. You're not alone. Each story is a beacon of hope for someone still in the dark.
-            </p>
-          </div>
-        </div>
-
         {/* Stories Feed */}
         {loading ? (
           <div className="animate-pulse space-y-6 pt-4">
@@ -137,43 +122,59 @@ export default function CommunityPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {stories.map((story, index) => (
-              <div 
-                key={story.id || index}
-                className={`bg-white rounded-[32px] p-8 shadow-sm relative overflow-hidden ${
-                  index === 0 ? 'border-l-4 border-l-[#166534]' : 'border border-gray-100'
-                }`}
-              >
-                {/* Author Section */}
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <span className={`text-[13px] font-bold tracking-widest ${
-                      story.authorIcon === 'sparkles' ? 'text-[#C53F54]' : 'text-[#166534]'
-                    }`}>
-                      {story.authorName}
-                    </span>
+            {stories.map((story, index) => {
+              const isExpanded = !!expandedStories[story.id];
+              return (
+                <div 
+                  key={story.id || index}
+                  className={`bg-white rounded-[32px] p-8 shadow-sm relative overflow-hidden ${
+                    index === 0 ? 'border-l-4 border-l-[#166534]' : 'border border-gray-100'
+                  }`}
+                >
+                  {/* Author Section */}
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <span className={`text-[13px] font-bold tracking-widest ${
+                        story.authorIcon === 'sparkles' ? 'text-[#C53F54]' : 'text-[#166534]'
+                      }`}>
+                        {story.authorName}
+                      </span>
+                    </div>
+                    {story.timeAgo && (
+                      <span className="text-[12px] font-medium text-gray-400">
+                        {story.timeAgo}
+                      </span>
+                    )}
                   </div>
-                  {story.timeAgo && (
-                    <span className="text-[12px] font-medium text-gray-400">
-                      {story.timeAgo}
-                    </span>
-                  )}
+
+                  {/* Content */}
+                  <h4 className="text-[22px] font-extrabold text-[#111827] leading-tight mb-3 tracking-tight">
+                    {story.title}
+                  </h4>
+                  
+                  <p className={`text-[#6B7280] text-[15px] font-medium leading-relaxed italic mb-5 pr-4 whitespace-pre-line transition-all ${
+                    isExpanded ? '' : 'line-clamp-3'
+                  }`}>
+                    {story.content}
+                  </p>
+
+                  <button 
+                    onClick={() => setExpandedStories(prev => ({ ...prev, [story.id]: !prev[story.id] }))}
+                    className="text-[#C53F54] font-bold text-[15px] flex items-center gap-1 hover:text-[#9e3343] transition-colors cursor-pointer active:scale-95"
+                  >
+                    {isExpanded ? (
+                      <>
+                        Show less <ArrowLeft className="rotate-90 ml-1" size={16} strokeWidth={3} />
+                      </>
+                    ) : (
+                      <>
+                        Read full story <ArrowLeft className="rotate-180 ml-1" size={16} strokeWidth={3} />
+                      </>
+                    )}
+                  </button>
                 </div>
-
-                {/* Content */}
-                <h4 className="text-[22px] font-extrabold text-[#111827] leading-tight mb-3 tracking-tight">
-                  {story.title}
-                </h4>
-                
-                <p className="text-[#6B7280] text-[15px] font-medium leading-relaxed italic mb-5 pr-4 line-clamp-3">
-                  {story.content}
-                </p>
-
-                <button className="text-[#C53F54] font-bold text-[15px] flex items-center gap-1 hover:text-[#9e3343] transition-colors cursor-pointer">
-                  Read full story <ArrowLeft className="rotate-180 ml-1" size={16} strokeWidth={3} />
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

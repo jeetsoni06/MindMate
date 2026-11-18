@@ -157,13 +157,16 @@ export async function DELETE(request: Request) {
     moderationState.userDailyTime.delete(userId);
     savePersistedState();
 
+    // Complete cascade delete across all Supabase tables
     try {
-      await supabaseAdmin
-        .from('auth_users')
-        .delete()
-        .eq('id', userId);
+      await Promise.allSettled([
+        supabaseAdmin.from('journals').delete().eq('user_id', userId),
+        supabaseAdmin.from('chat_messages').delete().eq('user_id', userId),
+        supabaseAdmin.from('tasks').delete().eq('user_id', userId),
+        supabaseAdmin.from('auth_users').delete().eq('id', userId)
+      ]);
     } catch (dbErr) {
-      console.warn("Supabase auth_users delete notice:", dbErr);
+      console.warn("Supabase cascade delete notice:", dbErr);
     }
 
     return NextResponse.json({ success: true, message: 'User permanently deleted' });

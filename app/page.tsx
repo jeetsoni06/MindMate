@@ -33,7 +33,7 @@ export default function LandingPage() {
               <span className="text-[#b42243] italic">Reflect</span>, Relax, and Reconnect
             </h1>
             <p className="text-xl md:text-xl text-[#594042] max-w-2xl mx-auto leading-relaxed font-medium">
-              Journal your thoughts, talk to your AI friend, and build a mindful routine that grows with you.
+              Journal your thoughts, talk to your AI friend, and build a mindful routine.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-10 p-5">
               <Link href="/auth" className="bg-[#b42243] hover:bg-[#ff5c77] text-white px-10 py-4 rounded-full text-lg font-bold transition-all shadow-xl shadow-[#b42243]/20">
@@ -57,7 +57,6 @@ export default function LandingPage() {
         <section id="features" className="py-24">
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
             <div className="max-w-xl">
-              <h2 className="text-4xl font-bold tracking-tight mb-4">Mindful Tools for Every Moment</h2>
               <p className="text-lg text-[#594042] font-medium leading-relaxed">Designed to be gentle, supportive, and completely private. Explore features that help you find your center.</p>
             </div>
             <div className="hidden md:block">
@@ -96,7 +95,7 @@ export default function LandingPage() {
               <div className="flex flex-col h-full">
                 <Flame size={40} className="text-[#78555e] mb-6" />
                 <h3 className="text-2xl font-bold mb-4 text-[#191c1b]">Daily Streak</h3>
-                <p className="text-[#594042] font-medium leading-relaxed">Stay consistent and build healthy mental habits. Small daily steps lead to lasting peace.</p>
+                <p className="text-[#594042] font-medium leading-relaxed">Stay consistent and build healthy mental habits.</p>
                 <div className="mt-auto bg-white/60 rounded-2xl p-6 backdrop-blur-sm border border-white mt-8">
                   <div className="flex gap-2 justify-between items-end h-16">
                     {[100, 80, 100, 50, 100, 90, 100].map((h, i) => (
